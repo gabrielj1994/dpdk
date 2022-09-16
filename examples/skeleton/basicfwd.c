@@ -147,7 +147,7 @@ lcore_main(void)
 		RTE_ETH_FOREACH_DEV(port) {
 			// LAB1: Only use port1
 			if (port != 1) continue;
-			
+
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
 			const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
@@ -209,7 +209,7 @@ main(int argc, char *argv[])
 
 	/* Initializing all ports. 8< */
 	RTE_ETH_FOREACH_DEV(portid) {
-		printf("\nLOGGING: [portid=%u]", portid)
+		printf("\nLOGGING: [portid=%u]", portid);
 		// LAB1: Only use port1
 		if (portid != 1) continue;
 		if (port_init(portid, mbuf_pool) != 0)
