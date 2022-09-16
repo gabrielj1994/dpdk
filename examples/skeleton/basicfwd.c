@@ -156,7 +156,10 @@ lcore_main(void)
 				continue;
 
 			/* Send burst of TX packets, to second port of pair. */
-			const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
+			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
+			// 		bufs, nb_rx);
+			//LAB1: try bursting same port
+			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
 					bufs, nb_rx);
 
 			/* Free any unsent packets. */
@@ -208,7 +211,7 @@ main(int argc, char *argv[])
 
 	/* Initializing all ports. 8< */
 	RTE_ETH_FOREACH_DEV(portid) {
-		printf("\nLOGGING: [portid=%u]", portid);
+		printf("\nLOGGING: [portid=%u]\n", portid);
 		// LAB1: Only use port1
 		if (portid != 1) continue;
 		if (port_init(portid, mbuf_pool) != 0)
