@@ -145,7 +145,7 @@ lcore_main(void)
 		 * port. The mapping is 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2, etc.
 		 */
 		RTE_ETH_FOREACH_DEV(port) {
-			printf("\nLOGGING: Starting port forwarding test [portid=%u]\n", portid);
+			printf("\nLOGGING: Starting port forwarding test [portid=%u]\n", port);
 			// LAB1: Only use port1
 			if (port != 1) continue;
 			/* Get burst of RX packets, from first port of pair. */
@@ -156,7 +156,7 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
-			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u]\n", portid);
+			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u]\n", port);
 			
 			/* Send burst of TX packets, to second port of pair. */
 			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
@@ -165,7 +165,7 @@ lcore_main(void)
 			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
 					bufs, nb_rx);
 
-			printf("\nLOGGING: Burst of TX packets to second port passed [portid=%u]\n", portid);
+			printf("\nLOGGING: Burst of TX packets to second port passed [portid=%u]\n", port);
 
 			/* Free any unsent packets. */
 			if (unlikely(nb_tx < nb_rx)) {
