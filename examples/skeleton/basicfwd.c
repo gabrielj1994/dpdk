@@ -147,7 +147,6 @@ lcore_main(void)
 		RTE_ETH_FOREACH_DEV(port) {
 			// LAB1: Only use port1
 			if (port != 1) continue;
-
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
 			const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
