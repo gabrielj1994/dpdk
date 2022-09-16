@@ -203,11 +203,12 @@ main(int argc, char *argv[])
 		rte_exit(EXIT_FAILURE, "Cannot create mbuf pool\n");
 
 	/* Initializing all ports. 8< */
-	RTE_ETH_FOREACH_DEV(portid)
+	RTE_ETH_FOREACH_DEV(portid) {
 		if (portid != 1) continue;
 		if (port_init(portid, mbuf_pool) != 0)
 			rte_exit(EXIT_FAILURE, "Cannot init port %"PRIu16 "\n",
 					portid);
+	}
 	/* >8 End of initializing all ports. */
 
 	if (rte_lcore_count() > 1)
