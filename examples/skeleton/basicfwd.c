@@ -124,13 +124,16 @@ lcore_main(void)
 	 * Check that the port is on the same NUMA node as the polling thread
 	 * for best performance.
 	 */
-	RTE_ETH_FOREACH_DEV(port)
+	RTE_ETH_FOREACH_DEV(port) {
+		// LAB1: Only use port1
+		if (port != 1) continue;
 		if (rte_eth_dev_socket_id(port) >= 0 &&
 				rte_eth_dev_socket_id(port) !=
 						(int)rte_socket_id())
 			printf("WARNING, port %u is on remote NUMA node to "
 					"polling thread.\n\tPerformance will "
 					"not be optimal.\n", port);
+	}
 
 	printf("\nCore %u forwarding packets. [Ctrl+C to quit]\n",
 			rte_lcore_id());
@@ -142,7 +145,9 @@ lcore_main(void)
 		 * port. The mapping is 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2, etc.
 		 */
 		RTE_ETH_FOREACH_DEV(port) {
-
+			// LAB1: Only use port1
+			if (port != 1) continue;
+			
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
 			const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
@@ -204,6 +209,7 @@ main(int argc, char *argv[])
 
 	/* Initializing all ports. 8< */
 	RTE_ETH_FOREACH_DEV(portid) {
+		// LAB1: Only use port1
 		if (portid != 1) continue;
 		if (port_init(portid, mbuf_pool) != 0)
 			rte_exit(EXIT_FAILURE, "Cannot init port %"PRIu16 "\n",
