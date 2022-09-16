@@ -140,7 +140,7 @@ lcore_main(void)
 
 	/* Main work of application loop. 8< */
 	//LAB1: only loop once
-	//for (;;) {
+	for (;;) {
 		/*
 		 * Receive packets on a port and forward them on the paired
 		 * port. The mapping is 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2, etc.
@@ -177,9 +177,11 @@ lcore_main(void)
 					rte_pktmbuf_free(bufs[buf]);
 			}
 		}
+		//LAB1: sleep 3 seconds
+		sleep(3);
 	}
 	/* >8 End of loop. */
-//}
+}
 /* >8 End Basic forwarding application lcore. */
 
 /*
