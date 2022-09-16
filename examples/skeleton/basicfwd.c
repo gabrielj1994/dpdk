@@ -159,6 +159,9 @@ lcore_main(void)
 			const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
 					bufs, BURST_SIZE);
 
+			//LAB1: sleep 1 seconds
+		    sleep(1);
+
 			if (unlikely(nb_rx == 0))
 				continue;
 
