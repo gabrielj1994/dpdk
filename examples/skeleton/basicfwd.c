@@ -166,6 +166,11 @@ lcore_main(void)
 				continue;
 
 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u]\n", port);
+			uint16_t size = sizeof bufs / sizeof *bufs;
+			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
+			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
+
+
 			
 			/* Send burst of TX packets, to second port of pair. */
 			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
