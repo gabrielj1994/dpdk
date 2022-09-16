@@ -40,6 +40,9 @@ port_init(uint16_t port, struct rte_mempool *mbuf_pool)
 	if (!rte_eth_dev_is_valid_port(port))
 		return -1;
 
+    // LAB1: Only use port1
+	if (port != 1) return -1;
+
 	memset(&port_conf, 0, sizeof(struct rte_eth_conf));
 
 	retval = rte_eth_dev_info_get(port, &dev_info);
