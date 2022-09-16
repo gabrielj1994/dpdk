@@ -139,7 +139,8 @@ lcore_main(void)
 			rte_lcore_id());
 
 	/* Main work of application loop. 8< */
-	for (;;) {
+	//LAB1: only loop once
+	//for (;;) {
 		/*
 		 * Receive packets on a port and forward them on the paired
 		 * port. The mapping is 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2, etc.
@@ -148,6 +149,8 @@ lcore_main(void)
 			printf("\nLOGGING: Starting port forwarding test [portid=%u]\n", port);
 			// LAB1: Only use port1
 			if (port != 1) continue;
+
+			printf("\nLOGGING: Attempt burst of RX packets [portid=%u]\n", port);
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
 			const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
@@ -176,7 +179,7 @@ lcore_main(void)
 		}
 	}
 	/* >8 End of loop. */
-}
+//}
 /* >8 End Basic forwarding application lcore. */
 
 /*
