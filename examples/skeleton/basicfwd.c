@@ -171,12 +171,14 @@ lcore_main(void)
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
 			char *data;
 			char *pointer;
-			char copy[data_len];
+			char copy[data_len+1];
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t counter = 0;
 			for(pointer = data; pointer < data + data_len; ++pointer) {
 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
 				copy[counter] = *pointer;
+				printf("\nLOGGING: Data Log [copy_val=%hhx]\n", copy[counter]);
+
 				++counter;
 				//LAB1: Failsafe
 				if (counter >= data_len+20) {
@@ -190,7 +192,7 @@ lcore_main(void)
 			counter = 0;
 			for ( ; *prtp != '\0'; ++prtp )
 			{
-			printf("%02x ", *prtp);
+			printf("%02hhx ", *prtp);
 			if (counter % 4 == 0)
 				printf("\n");
 			++counter;
