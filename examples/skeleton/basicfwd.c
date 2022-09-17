@@ -165,19 +165,35 @@ lcore_main(void)
 			//LAB1: sleep 1 seconds
 		    sleep(1);
 
-			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u]\n", port);
+			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
 			uint16_t size = sizeof bufs / sizeof *bufs;
 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
 			char *data;
 			char *pointer;
+			char copy[];
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t counter = 0;
 			for(pointer = data; pointer < data + data_len; ++pointer) {
 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
+				copy[counter] = *pointer;
 				++counter;
 				//LAB1: Failsafe
-				if (counter >= data_len+100) break;
+				if (counter >= data_len+20) {
+					printf("\nLOGGING: Failsafe triggered\n");
+					break;
+				}
+			}
+			copy[counter+1] = '\0';
+			//LAB1: Print packet (for hardcoding purposes)
+			char* prtp = copy;
+			counter = 0;
+			for ( ; *prtp != '\0'; ++prtp )
+			{
+			printf("%02x ", *prtp);
+			if (counter % 4 == 0)
+				printf("\n");
+			++counter;
 			}
 			
 			/* Send burst of TX packets, to second port of pair. */
