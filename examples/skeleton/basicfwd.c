@@ -243,8 +243,11 @@ lcore_main(void)
 			32 33 34 35 
 			36 37 
 			*/
-			memcpy(&copy[6], &data[0], 6 * sizeof(data[0]));
-			memcpy(&copy[0], &data[6], 6 * sizeof(data[0]));
+			if (data_len == 98) {
+				memcpy(&copy[6], &data[0], 6 * sizeof(data[0]));
+				memcpy(&copy[0], &data[6], 6 * sizeof(data[0]));
+			}
+			
 			char* prtp = copy;
 			counter = 0;
 			for (; counter < data_len; ++prtp )
