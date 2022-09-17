@@ -171,7 +171,7 @@ lcore_main(void)
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
 			char *data;
 			char *pointer;
-			char copy[];
+			char copy[data_len];
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t counter = 0;
 			for(pointer = data; pointer < data + data_len; ++pointer) {
