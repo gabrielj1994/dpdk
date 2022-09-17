@@ -184,7 +184,7 @@ lcore_main(void)
 			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
 			// 		bufs, nb_rx);
 			//LAB1: No TX, only receive
-			const uint16_t nb_tx = 0
+			const uint16_t nb_tx = 0;
 			// const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
 			// 		bufs, nb_rx);
 
