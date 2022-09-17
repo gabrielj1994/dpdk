@@ -173,11 +173,11 @@ lcore_main(void)
 			char *pointer;
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t counter = 0;
-			for(pointer = data; data < data + data_len; ++pointer) {
+			for(pointer = data; pointer < data + data_len; ++pointer) {
 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
 				++counter;
 				//LAB1: Failsafe
-				if (counter >= data_len) break;
+				if (counter >= data_len+100) break;
 			}
 			
 			/* Send burst of TX packets, to second port of pair. */
