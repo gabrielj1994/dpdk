@@ -309,15 +309,27 @@ fromtype: 20990 -> 51FE
             	rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr *,
                         sizeof(struct rte_ether_hdr));
 			//calculate offset
-			printf("\nLOGGING: IPv4 api check [header_ptr=%p, data_ptr=%p]\n", ipv4_hdr, data);
+			printf("\nLOGGING: IPv4 api check [bufs0_ptr=%p, header_ptr=%p, data_ptr=%p]\n", bufs[0], ipv4_hdr, data);
 			//print checksum from helpers
-			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", ipv4_hdr->hdr_checksum);
+			printf("\nLOGGING: IPv4 api check [header_checksum=%u]\n", ipv4_hdr->hdr_checksum);
+			
+			//print from bufs[0] to data
+			printf("\nLOGGING: BUFS[0] to data\n");
+			char *prtp = bufs[0];
+			counter = 0;
+			while (prtp != data) {
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+			}
+
 
 			//check checksums
 			struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
 			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
 			//0 out checksum
-			char *prtp = data+sizeof(data[0])*12;
+			prtp = data+sizeof(data[0])*12;
 			counter = 0;
 			printf("\nLOGGING: Original checksum\n");
 			//TODO: move this to a function for printing data
