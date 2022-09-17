@@ -171,7 +171,7 @@ lcore_main(void)
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
 			char *data;
 			char *pointer;
-			char copy[data_len+1];
+			char copy[data_len];
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t counter = 0;
 			for(pointer = data; pointer < data + data_len; ++pointer) {
@@ -186,16 +186,15 @@ lcore_main(void)
 					break;
 				}
 			}
-			copy[counter+1] = '\0';
 			//LAB1: Print packet (for hardcoding purposes)
 			char* prtp = copy;
 			counter = 0;
-			for ( ; *prtp != '\0'; ++prtp )
+			for (; counter < data_len; ++prtp )
 			{
 			printf("%02hhx ", *prtp);
+			++counter;
 			if (counter % 4 == 0)
 				printf("\n");
-			++counter;
 			}
 			
 			/* Send burst of TX packets, to second port of pair. */
