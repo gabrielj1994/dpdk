@@ -269,13 +269,67 @@ d0 58 5f 33
 2e 2f 30 31 
 32 33 34 35 
 36 37
+
+===
+swapped addresses packet:
+swapped addresses
+ec b1 d7 85 
+6a 13 14 58 
+d0 58 5f 33 
+08 00 45 00 
+00 54 67 ff 
+40 00 40 01 
+4f 54 c0 a8 
+01 02 c0 a8 
+01 03 08 00 
+61 76 00 0a 
+00 01 d5 2c 
+26 63 00 00 
+00 00 d2 1b 
+0a 00 00 00 
+00 00 10 11 
+12 13 14 15 
+16 17 18 19 
+1a 1b 1c 1d 
+1e 1f 20 21 
+22 23 24 25 
+26 27 28 29 
+2a 2b 2c 2d 
+2e 2f 30 31 
+32 33 34 35 
+36 37
+
+checksum issues
+nochange: 53381 -> D085
+fromtype: 20990 -> 51FE
 			*/
+			//attempt to use ipv4 helpers
+			/* Handle IPv4 headers.*/
+        	struct rte_ipv4_hdr *ipv4_hdr =
+            	rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr *,
+                        sizeof(struct rte_ether_hdr));
+			//calculate offset
+			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", (uint16_t)(ipv4_hdr-data));
+			//print checksum from helpers
+			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", pkt->hdr_checksum);
+			
 			//check checksums
 			struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
 			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
 			//0 out checksum
-			strcpy( data+sizeof(data[0])*14, "\x00\x00");
 			char *prtp = data+sizeof(data[0])*12;
+			counter = 0;
+			printf("\nLOGGING: Original checksum\n");
+			//TODO: move this to a function for printing data
+			for (; counter < 4; ++prtp )
+			{
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+			}
+			strcpy( data+sizeof(data[0])*14, "\x00\x00");
+			prtp = data+sizeof(data[0])*12;
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
@@ -286,6 +340,7 @@ d0 58 5f 33
 				if (counter % 4 == 0)
 					printf("\n");
 			}
+
 			//Calculate checksum with 2 potential starts for the header pointer
 			uint16_t cksum;
 			cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
