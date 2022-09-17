@@ -176,6 +176,8 @@ lcore_main(void)
 			for(pointer = data; data < data + data_len; ++pointer) {
 				printf("\nLOGGING: Data Log [position=%u, char_val=%c]\n", counter, *pointer);
 				++counter;
+				//LAB1: Failsafe
+				if (counter >= data_len) break;
 			}
 			
 			/* Send burst of TX packets, to second port of pair. */
