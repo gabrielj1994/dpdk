@@ -242,13 +242,90 @@ lcore_main(void)
 			2e 2f 30 31 
 			32 33 34 35 
 			36 37 
+=======
+swapped addresses test
+ec b1 d7 85 
+6a 13 14 58 
+d0 58 5f 33 
+08 00 45 00 
+00 54 63 ba 
+40 00 40 01 
+53 99 c0 a8 
+01 02 c0 a8 
+01 03 08 00 
+37 4d 00 05 
+00 01 a6 7e 
+25 63 00 00 
+00 00 33 f8 
+02 00 00 00 
+00 00 10 11 
+12 13 14 15 
+16 17 18 19 
+1a 1b 1c 1d 
+1e 1f 20 21 
+22 23 24 25 
+26 27 28 29 
+2a 2b 2c 2d 
+2e 2f 30 31 
+32 33 34 35 
+36 37
 			*/
+			//check checksums
+			struct rte_ipv4_hdr *ipv4_hdr_nochange = data;
+			struct rte_ipv4_hdr *ipv4_hdr_fromtype = data+sizeof(data[0]*12);
+			//0 out checksum
+			strncpy( data+sizeof(data[0]*14), "\x00\x00");
+			prtp = data+sizeof(data[0]*12);
+			counter = 0;
+			printf("\nLOGGING: Testing checksum manipulation\n");
+			//TODO: move this to a function for printing data
+			for (; counter < 2; ++prtp )
+			{
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+			}
+			//Calculate checksum with 2 potential starts for the header pointer
+			uint16_t cksum;
+			cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
+			printf("\nLOGGING: Testing checksum calculation [cksum_nochange=%u]\n", (uint16_t)~cksum);
+			//Check if the checksum is automatically updated
+			prtp = data+sizeof(data[0]*12);
+			counter = 0;
+			printf("\nLOGGING: Testing checksum manipulation\n");
+			//TODO: move this to a function for printing data
+			for (; counter < 2; ++prtp )
+			{
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+			}
+			//0 out checksum, in case it was manipulated
+			strncpy( data+sizeof(data[0]*14), "\x00\x00");
+			prtp = data+sizeof(data[0]*12);
+			counter = 0;
+			printf("\nLOGGING: Testing checksum manipulation\n");
+			//TODO: move this to a function for printing data
+			for (; counter < 2; ++prtp )
+			{
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+			}
+
+			cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
+			printf("\nLOGGING: Testing checksum calculation [cksum_fromtype=%u]\n", (uint16_t)~cksum);
+
 			if (data_len == 98) {
 				memcpy(&copy[6], &data[0], 6 * sizeof(data[0]));
 				memcpy(&copy[0], &data[6], 6 * sizeof(data[0]));
 			}
 			
-			char* prtp = copy;
+			printf("\nLOGGING: Confirm swapped addresses\n");
+			prtp = copy;
 			counter = 0;
 			for (; counter < data_len; ++prtp )
 			{
