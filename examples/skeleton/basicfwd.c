@@ -322,6 +322,7 @@ fromtype: 20990 -> 51FE
 				++counter;
 				if (counter % 4 == 0)
 					printf("\n");
+				++prtp;
 			}
 
 
