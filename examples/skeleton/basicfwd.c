@@ -275,7 +275,7 @@ d0 58 5f 33
 			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0]*12));
 			//0 out checksum
 			strcpy( data+sizeof(data[0]*14), "\x00\x00");
-			prtp = data+sizeof(data[0]*12);
+			char *prtp = data+sizeof(data[0]*12);
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
