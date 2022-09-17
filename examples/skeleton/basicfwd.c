@@ -272,14 +272,14 @@ d0 58 5f 33
 			*/
 			//check checksums
 			struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
-			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0]*12));
+			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
 			//0 out checksum
-			strcpy( data+sizeof(data[0]*14), "\x00\x00");
-			char *prtp = data+sizeof(data[0]*12);
+			strcpy( data+sizeof(data[0])*14, "\x00\x00");
+			char *prtp = data+sizeof(data[0])*12;
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
-			for (; counter < 2; ++prtp )
+			for (; counter < 4; ++prtp )
 			{
 				printf("%02hhx ", *prtp);
 				++counter;
@@ -291,11 +291,11 @@ d0 58 5f 33
 			cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
 			printf("\nLOGGING: Testing checksum calculation [cksum_nochange=%u]\n", (uint16_t)~cksum);
 			//Check if the checksum is automatically updated
-			prtp = data+sizeof(data[0]*12);
+			prtp = data+sizeof(data[0])*12;
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
-			for (; counter < 2; ++prtp )
+			for (; counter < 4; ++prtp )
 			{
 				printf("%02hhx ", *prtp);
 				++counter;
@@ -303,12 +303,12 @@ d0 58 5f 33
 					printf("\n");
 			}
 			//0 out checksum, in case it was manipulated
-			strcpy( data+sizeof(data[0]*14), "\x00\x00");
-			prtp = data+sizeof(data[0]*12);
+			strcpy( data+sizeof(data[0])*14, "\x00\x00");
+			prtp = data+sizeof(data[0])*12;
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
-			for (; counter < 2; ++prtp )
+			for (; counter < 4; ++prtp )
 			{
 				printf("%02hhx ", *prtp);
 				++counter;
