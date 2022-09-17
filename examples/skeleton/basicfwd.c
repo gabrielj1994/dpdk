@@ -170,11 +170,11 @@ lcore_main(void)
 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
 			char *data;
+			char *pointer;
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t counter = 0;
-			for(;data < bufs[0] + data_len; ++data) 
-			{
-				printf("\nLOGGING: Data Log [position=%u, char_val=%c]\n", counter, *data);
+			for(pointer = data; data < data + data_len; ++pointer) {
+				printf("\nLOGGING: Data Log [position=%u, char_val=%c]\n", counter, *pointer);
 				++counter;
 			}
 			
