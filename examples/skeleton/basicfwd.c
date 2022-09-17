@@ -311,8 +311,8 @@ fromtype: 20990 -> 51FE
 			//calculate offset
 			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", (uint16_t)(ipv4_hdr-data));
 			//print checksum from helpers
-			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", pkt->hdr_checksum);
-			
+			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", ipv4_hdr->hdr_checksum);
+
 			//check checksums
 			struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
 			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
