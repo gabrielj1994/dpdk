@@ -315,7 +315,7 @@ fromtype: 20990 -> 51FE
 			
 			//print from bufs[0] to data
 			printf("\nLOGGING: BUFS[0] to data\n");
-			char *prtp = bufs[0];
+			char *prtp = (char *)bufs[0];
 			counter = 0;
 			while (prtp != data) {
 				printf("%02hhx ", *prtp);
