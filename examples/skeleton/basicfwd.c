@@ -309,7 +309,7 @@ fromtype: 20990 -> 51FE
             	rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr *,
                         sizeof(struct rte_ether_hdr));
 			//calculate offset
-			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", (uint16_t)(ipv4_hdr-data));
+			printf("\nLOGGING: IPv4 api check [header_ptr=%p, data_ptr=%p]\n", ipv4_hdr, data);
 			//print checksum from helpers
 			printf("\nLOGGING: IPv4 api check [header_offset=%u]\n", ipv4_hdr->hdr_checksum);
 
