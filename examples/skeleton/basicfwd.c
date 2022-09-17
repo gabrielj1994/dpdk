@@ -187,6 +187,64 @@ lcore_main(void)
 				}
 			}
 			//LAB1: Print packet (for hardcoding purposes)
+			/*
+			Captured Packet
+			14 58 d0 58 
+			5f 33 ec b1 
+			d7 85 6a 13 
+			08 00 45 00 
+			00 54 7c 5d 
+			40 00 40 01 
+			3a f6 c0 a8 
+			01 02 c0 a8 
+			01 03 08 00 
+			2b 83 00 03 
+			00 01 8a 6e 
+			25 63 00 00 
+			00 00 59 d4 
+			04 00 00 00 
+			00 00 10 11 
+			12 13 14 15 
+			16 17 18 19 
+			1a 1b 1c 1d 
+			1e 1f 20 21 
+			22 23 24 25 
+			26 27 28 29 
+			2a 2b 2c 2d 
+			2e 2f 30 31 
+			32 33 34 35 
+			36 37
+====
+			14 58 d0 58 
+			5f 33 ec b1 
+			d7 85 6a 13 
+			// addresses^
+			08 00 45 00 
+			00 54 2d dd 
+			40 00 40 01 
+			89 76 c0 a8 
+			01 02 c0 a8 
+			01 03 08 00 
+			68 43 00 04 
+			//10^
+			00 01 89 70 
+			25 63 00 00 
+			00 00 1d 11 
+			05 00 00 00 
+			00 00 10 11 
+			12 13 14 15 
+			16 17 18 19 
+			1a 1b 1c 1d 
+			1e 1f 20 21 
+			22 23 24 25 
+			26 27 28 29 
+			2a 2b 2c 2d 
+			2e 2f 30 31 
+			32 33 34 35 
+			36 37 
+			*/
+			memcpy(&copy[6], &data[0], 6 * sizeof(data[0]));
+			memcpy(&copy[0], &data[6], 6 * sizeof(data[0]));
 			char* prtp = copy;
 			counter = 0;
 			for (; counter < data_len; ++prtp )
