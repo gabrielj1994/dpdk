@@ -271,10 +271,10 @@ d0 58 5f 33
 36 37
 			*/
 			//check checksums
-			struct rte_ipv4_hdr *ipv4_hdr_nochange = data;
-			struct rte_ipv4_hdr *ipv4_hdr_fromtype = data+sizeof(data[0]*12);
+			struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
+			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0]*12));
 			//0 out checksum
-			strncpy( data+sizeof(data[0]*14), "\x00\x00");
+			strcpy( data+sizeof(data[0]*14), "\x00\x00");
 			prtp = data+sizeof(data[0]*12);
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
@@ -303,7 +303,7 @@ d0 58 5f 33
 					printf("\n");
 			}
 			//0 out checksum, in case it was manipulated
-			strncpy( data+sizeof(data[0]*14), "\x00\x00");
+			strcpy( data+sizeof(data[0]*14), "\x00\x00");
 			prtp = data+sizeof(data[0]*12);
 			counter = 0;
 			printf("\nLOGGING: Testing checksum manipulation\n");
