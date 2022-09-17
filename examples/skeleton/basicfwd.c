@@ -183,11 +183,11 @@ lcore_main(void)
 			/* Send burst of TX packets, to second port of pair. */
 			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
 			// 		bufs, nb_rx);
-			//LAB1: try bursting same port
-			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
-					bufs, nb_rx);
+			//LAB1: No TX, only receive
+			// const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
+			// 		bufs, nb_rx);
 
-			printf("\nLOGGING: Burst of TX packets to second port passed [portid=%u]\n", port);
+			// printf("\nLOGGING: Burst of TX packets to second port passed [portid=%u]\n", port);
 
 			/* Free any unsent packets. */
 			if (unlikely(nb_tx < nb_rx)) {
