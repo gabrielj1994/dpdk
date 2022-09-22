@@ -269,7 +269,7 @@ lcore_main(void)
 							0x00, 0x00, 0x00, 0x00,
 							0x00, 0x00, 0x00, 0x00,
 							0x00, 0x00, 0x00, 0x00};
-			printf("\nLOGGING: Dummy log [test_0=%d]\n", sizeof(test[0]));
+			printf("\nLOGGING: Dummy log [test_0=%u]\n", (uint16_t)sizeof(test[0]));
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
 			struct rte_icmp_hdr *icmp_hdr;
