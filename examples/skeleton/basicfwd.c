@@ -324,7 +324,7 @@ lcore_main(void)
 			struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ether_hdr *, 0);
 			printf("\nLOGGING: Ether Header check\n");
 			printf("\nLOGGING: Destination Address\n");
-			char *prtp = &(ether_hdr->dst_addr);
+			char *prtp = (char *)(&(ether_hdr->dst_addr));
 			counter = 0;
 			while (counter < 6) {
 				printf("%02hhx ", *prtp);
@@ -335,7 +335,7 @@ lcore_main(void)
 			}
 
 			printf("\nLOGGING: Source Address\n");
-			prtp = &(ether_hdr->src_addr);
+			prtp = (char *)(&(ether_hdr->src_addr));
 			counter = 0;
 			while (counter < 6) {
 				printf("%02hhx ", *prtp);
