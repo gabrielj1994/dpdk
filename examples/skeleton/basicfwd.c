@@ -181,7 +181,7 @@ lcore_main(void)
 			uint16_t pkt_counter = 0;
 			while (pkt_counter < nb_rx) {
 				//
-				pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
+				// pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
 				//todo: is this needed?
 				// mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
 
