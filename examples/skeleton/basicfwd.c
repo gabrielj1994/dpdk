@@ -188,8 +188,8 @@ lcore_main(void)
 
 			printf("\nLOGGING: Counter log [counter=%u]\n", counter);
 
-			uint16_t counter = 0;
-			for(prtp = data; pointer < data + data_len; ++prtp) {
+			counter = 0;
+			for(prtp = data; prtp < data + pkt_len; ++prtp) {
 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
 				++counter;
 				//LAB1: Failsafe
