@@ -164,7 +164,7 @@ lcore_main(void)
 				continue;
 
 			uint16_t pkt_len;
-			struct rte_mbuf *mbuf;
+			// struct rte_mbuf *mbuf;
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
 			struct rte_icmp_hdr *icmp_hdr;
@@ -175,7 +175,7 @@ lcore_main(void)
 			uint16_t pkt_counter = 0;
 			while (pkt_counter < nb_rx) {
 				//
-				pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
+				// pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
 				//todo: is this needed?
 				// mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
 
