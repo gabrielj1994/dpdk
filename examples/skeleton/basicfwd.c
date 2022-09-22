@@ -501,7 +501,7 @@ lcore_main(void)
 			
 			printf("\nLOGGING: Confirm swapped addresses\n");
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
-			uint16_t counter = 0;
+			counter = 0;
 			for(pointer = data; pointer < data + data_len; ++pointer) {
 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
 
