@@ -493,7 +493,7 @@ lcore_main(void)
 			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
 			uint16_t cksum;
 			// uint16_t cksum = rte_raw_cksum(icmp_hdr, sizeof(struct rte_icmp_hdr));
-			cksum = ~icmp_h->icmp_cksum & 0xffff;
+			cksum = ~icmp_hdr->icmp_cksum & 0xffff;
 			cksum += ~RTE_BE16(RTE_IP_ICMP_ECHO_REQUEST << 8) & 0xffff;
 			cksum += RTE_BE16(RTE_IP_ICMP_ECHO_REPLY << 8);
 			cksum = (cksum & 0xffff) + (cksum >> 16);
