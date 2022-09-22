@@ -163,25 +163,34 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
+			uint16_t pkt_len;
+			struct rte_mbuf mbuf;
+			struct rte_ether_hdr *ether_hdr;
+			struct rte_ipv4_hdr *ipv4_hdr;
+			struct rte_icmp_hdr *icmp_hdr;
+			struct rte_ether_addr eth_src;
+			uint32_t ip_addr_src;
+			uint16_t cksum;
+
 			uint16_t pkt_counter = 0;
 			while (pkt_counter < nb_rx) {
 				//
-				uint16_t pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
-				struct rte_mbuf mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
+				pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
+				mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
 
 				// The function documentation is wrong. Cast type is 2nd parameter, additional offset is 3rd parameter
-				struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ether_hdr *, 0);
-				struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
-				struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
+				ether_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ether_hdr *, 0);
+				ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
+				icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 
 				//ether frame
-				struct rte_ether_addr eth_src;
+				eth_src;
 				rte_ether_addr_copy(&eth_h->src_addr, &eth_src);
 				rte_ether_addr_copy(&eth_h->dst_addr, &eth_h->src_addr);
 				rte_ether_addr_copy(&eth_src, &eth_h->dst_addr);
 
 				//ipv4
-				uint32_t ip_addr_src = ipv4_hdr->src_addr;
+				ip_addr_src = ipv4_hdr->src_addr;
 				ipv4_hdr->src_addr = ipv4_hdr->dst_addr;
 				ipv4_hdr->dst_addr = ip_addr_src;
 
@@ -189,7 +198,7 @@ lcore_main(void)
 				icmp_hdr->icmp_cksum = 0;
 				icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
 				//TODO: calculate icmp packet size (data len - headers)
-				uint16_t cksum = rte_raw_cksum(icmp_hdr, 64);
+				cksum = rte_raw_cksum(icmp_hdr, 64);
 				icmp_hdr->icmp_cksum = (uint16_t)~~cksum;
 				++pkt_counter;
 			}
