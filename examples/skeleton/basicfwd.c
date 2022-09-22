@@ -167,6 +167,7 @@ lcore_main(void)
 		    sleep(1);
 
 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
+			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
 			char filename[40];
 			struct tm *timenow;
 			time_t now = time(NULL);
@@ -176,11 +177,11 @@ lcore_main(void)
 
 			FILE *fp;
 			fp = fopen(filename, "w");
-			rte_pktmbuf_dump(fp, bufs[0], 0);
+			rte_pktmbuf_dump(fp, bufs[0], data_len);
 			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
 
 			uint16_t size = sizeof bufs / sizeof *bufs;
-			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
+			
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
 			char *data;
 			char *pointer;
@@ -201,6 +202,7 @@ lcore_main(void)
 			}
 			//LAB1: Print packet (for hardcoding purposes)
 			/*
+			ec:b1:d7:85:6a:13
 			Captured Packet
 			14 58 d0 58 
 			5f 33 ec b1 
