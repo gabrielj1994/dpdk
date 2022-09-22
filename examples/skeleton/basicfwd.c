@@ -145,6 +145,12 @@ lcore_main(void)
 	/* Main work of application loop. 8< */
 	//LAB1: only loop once
 	for (;;) {
+		char filename[50];
+		struct tm *timenow;
+		time_t now = time(NULL);
+		timenow = gmtime(&now);
+		FILE *fp;
+
 		/*
 		 * Receive packets on a port and forward them on the paired
 		 * port. The mapping is 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2, etc.
@@ -163,7 +169,7 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
-			// uint16_t pkt_len;
+			uint16_t pkt_len;
 			// struct rte_mbuf *mbuf;
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
@@ -175,7 +181,7 @@ lcore_main(void)
 			uint16_t pkt_counter = 0;
 			while (pkt_counter < nb_rx) {
 				//
-				// pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
+				pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
 				//todo: is this needed?
 				// mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
 
@@ -200,8 +206,16 @@ lcore_main(void)
 				//TODO: calculate icmp packet size (data len - headers)
 				cksum = rte_raw_cksum(icmp_hdr, 64);
 				icmp_hdr->icmp_cksum = (uint16_t)~~cksum;
+
+				strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
+
+				fp = fopen(filename, "w");
+				rte_pktmbuf_dump(fp, bufs[pkt_counter], pkt_len);
+				printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
 				++pkt_counter;
 			}
+			fclose(fp);
+
 
 // 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
 // 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
