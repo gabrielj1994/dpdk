@@ -319,26 +319,49 @@ lcore_main(void)
 			fromtype: 20990 -> 51FE
 			*/
 			//attempt to use ipv4 helpers
+			// struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(mbuf, struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 			/* Handle IPv4 headers.*/
-        	struct rte_ipv4_hdr *ipv4_hdr =
-            	rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr *,
-                        sizeof(struct rte_ether_hdr));
-			//calculate offset
-			printf("\nLOGGING: IPv4 api check [bufs0_ptr=%p, header_ptr=%p, data_ptr=%p]\n", bufs[0], ipv4_hdr, data);
-			//print checksum from helpers
-			printf("\nLOGGING: IPv4 api check [header_checksum=%u]\n", ipv4_hdr->hdr_checksum);
-			
-			//print from bufs[0] to data
-			printf("\nLOGGING: BUFS[0] to data\n");
-			char *prtp = (char *)bufs[0];
+			struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(buf[0], struct rte_ether_hdr *, 0);
+			printf("\nLOGGING: Ether Header check\n");
+			printf("\nLOGGING: Destination Address\n");
+			char *prtp = &(ether_hdr->dst_addr);
 			counter = 0;
-			while (prtp != data) {
+			while (counter < 6) {
 				printf("%02hhx ", *prtp);
 				++counter;
 				if (counter % 4 == 0)
 					printf("\n");
 				++prtp;
 			}
+
+			printf("\nLOGGING: Source Address\n");
+			prtp = &(ether_hdr->src_addr);
+			counter = 0;
+			while (counter < 6) {
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+				++prtp;
+			}
+
+			
+			//calculate offset
+			// printf("\nLOGGING: IPv4 api check [bufs0_ptr=%p, header_ptr=%p, data_ptr=%p]\n", bufs[0], ipv4_hdr, data);
+			//print checksum from helpers
+			// printf("\nLOGGING: IPv4 api check [header_checksum=%u]\n", ipv4_hdr->hdr_checksum);
+			
+			//print from bufs[0] to data
+			// printf("\nLOGGING: BUFS[0] to data\n");
+			// prtp = (char *)bufs[0];
+			// counter = 0;
+			// while (prtp != data) {
+			// 	printf("%02hhx ", *prtp);
+			// 	++counter;
+			// 	if (counter % 4 == 0)
+			// 		printf("\n");
+			// 	++prtp;
+			// }
 			/*
 			LOGGING: IPv4 api check [bufs0_ptr=0x100789800, header_ptr=0x10078990e, data_ptr=0x100789900]
 			LOGGING: IPv4 api check [header_checksum=17297]
@@ -404,82 +427,113 @@ lcore_main(void)
 			*/
 
 
-			//check checksums
-			struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
-			struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
+			//check checksums (shouldn't be needed)
+			// struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
+			// struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
 			//0 out checksum
-			prtp = data+sizeof(data[0])*12;
-			counter = 0;
-			printf("\nLOGGING: Original checksum\n");
-			//TODO: move this to a function for printing data
-			for (; counter < 4; ++prtp )
-			{
-				printf("%02hhx ", *prtp);
-				++counter;
-				if (counter % 4 == 0)
-					printf("\n");
-			}
-			strcpy( data+sizeof(data[0])*14, "\x00\x00");
-			prtp = data+sizeof(data[0])*12;
-			counter = 0;
-			printf("\nLOGGING: Testing checksum manipulation\n");
-			//TODO: move this to a function for printing data
-			for (; counter < 4; ++prtp )
-			{
-				printf("%02hhx ", *prtp);
-				++counter;
-				if (counter % 4 == 0)
-					printf("\n");
-			}
+			// prtp = data+sizeof(data[0])*12;
+			// counter = 0;
+			// printf("\nLOGGING: Original checksum\n");
+			// //TODO: move this to a function for printing data
+			// for (; counter < 4; ++prtp )
+			// {
+			// 	printf("%02hhx ", *prtp);
+			// 	++counter;
+			// 	if (counter % 4 == 0)
+			// 		printf("\n");
+			// }
+			// strcpy( data+sizeof(data[0])*14, "\x00\x00");
+			// prtp = data+sizeof(data[0])*12;
+			// counter = 0;
+			// printf("\nLOGGING: Testing checksum manipulation\n");
+			// //TODO: move this to a function for printing data
+			// for (; counter < 4; ++prtp )
+			// {
+			// 	printf("%02hhx ", *prtp);
+			// 	++counter;
+			// 	if (counter % 4 == 0)
+			// 		printf("\n");
+			// }
 
 			//Calculate checksum with 2 potential starts for the header pointer
-			uint16_t cksum;
-			cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
-			printf("\nLOGGING: Testing checksum calculation [cksum_nochange=%u]\n", (uint16_t)~cksum);
+			// uint16_t cksum;
+			// cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
+			// printf("\nLOGGING: Testing checksum calculation [cksum_nochange=%u]\n", (uint16_t)~cksum);
 			//Check if the checksum is automatically updated
-			prtp = data+sizeof(data[0])*12;
-			counter = 0;
-			printf("\nLOGGING: Testing checksum manipulation\n");
+			// prtp = data+sizeof(data[0])*12;
+			// counter = 0;
+			// printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
-			for (; counter < 4; ++prtp )
-			{
-				printf("%02hhx ", *prtp);
-				++counter;
-				if (counter % 4 == 0)
-					printf("\n");
-			}
+			// for (; counter < 4; ++prtp )
+			// {
+			// 	printf("%02hhx ", *prtp);
+			// 	++counter;
+			// 	if (counter % 4 == 0)
+			// 		printf("\n");
+			// }
 			//0 out checksum, in case it was manipulated
-			strcpy( data+sizeof(data[0])*14, "\x00\x00");
-			prtp = data+sizeof(data[0])*12;
-			counter = 0;
-			printf("\nLOGGING: Testing checksum manipulation\n");
+			// strcpy( data+sizeof(data[0])*14, "\x00\x00");
+			// prtp = data+sizeof(data[0])*12;
+			// counter = 0;
+			// printf("\nLOGGING: Testing checksum manipulation\n");
 			//TODO: move this to a function for printing data
-			for (; counter < 4; ++prtp )
-			{
-				printf("%02hhx ", *prtp);
-				++counter;
-				if (counter % 4 == 0)
-					printf("\n");
-			}
+			// for (; counter < 4; ++prtp )
+			// {
+			// 	printf("%02hhx ", *prtp);
+			// 	++counter;
+			// 	if (counter % 4 == 0)
+			// 		printf("\n");
+			// }
 
-			cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
-			printf("\nLOGGING: Testing checksum calculation [cksum_fromtype=%u]\n", (uint16_t)~cksum);
-
+			// cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
+			struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
+			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
+			icmp_hdr->icmp_cksum = 0;
+			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
+			uint16_t cksum = rte_raw_cksum(icmp_hdr, sizeof(icmp_hdr));
+			printf("\nLOGGING: Testing checksum calculation [cksum_updated=%u]\n", (uint16_t)~cksum);
+			icmp_hdr->icmp_cksum = (rte_be16_t)~cksum;
+			// Address Swap. bufs[0] / data will be mutated. Copy will stay the same
 			if (data_len == 98) {
-				memcpy(&copy[6], &data[0], 6 * sizeof(data[0]));
-				memcpy(&copy[0], &data[6], 6 * sizeof(data[0]));
+				memcpy(&data[0], &copy[6], 6 * sizeof(data[0]));
+				memcpy(&data[6], &copy[0], 6 * sizeof(data[0]));
 			}
 			
 			printf("\nLOGGING: Confirm swapped addresses\n");
-			prtp = copy;
-			counter = 0;
-			for (; counter < data_len; ++prtp )
-			{
-			printf("%02hhx ", *prtp);
-			++counter;
-			if (counter % 4 == 0)
-				printf("\n");
+			data =  rte_pktmbuf_mtod(bufs[0], char*);
+			uint16_t counter = 0;
+			for(pointer = data; pointer < data + data_len; ++pointer) {
+				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
+
+				++counter;
+				//LAB1: Failsafe
+				if (counter >= data_len+20) {
+					printf("\nLOGGING: Failsafe triggered\n");
+					break;
+				}
 			}
+			//Dump to file
+			// char filename[40];
+			// struct tm *timenow;
+			// time_t now = time(NULL);
+			// timenow = gmtime(&now);
+
+			strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
+
+			fclose(fp);
+			fp = fopen(filename, "w");
+			rte_pktmbuf_dump(fp, bufs[0], data_len);
+			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
+
+			// prtp = copy;
+			// counter = 0;
+			// for (; counter < data_len; ++prtp )
+			// {
+			// printf("%02hhx ", *prtp);
+			// ++counter;
+			// if (counter % 4 == 0)
+			// 	printf("\n");
+			// }
 			
 			/* Send burst of TX packets, to second port of pair. */
 			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
