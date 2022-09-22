@@ -150,11 +150,11 @@ lcore_main(void)
 		 * port. The mapping is 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2, etc.
 		 */
 		RTE_ETH_FOREACH_DEV(port) {
-			printf("\nLOGGING: Starting port forwarding test [portid=%u]\n", port);
+			// printf("\nLOGGING: Starting port forwarding test [portid=%u]\n", port);
 			// LAB1: Only use port1
 			if (port != 1) continue;
 
-			printf("\nLOGGING: Attempt burst of RX packets [portid=%u]\n", port);
+			// printf("\nLOGGING: Attempt burst of RX packets [portid=%u]\n", port);
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
 			const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
@@ -163,393 +163,424 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
-			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
-			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
-			char filename[50];
-			struct tm *timenow;
-			time_t now = time(NULL);
-			timenow = gmtime(&now);
+			uint16_t pkt_counter = 0;
+			while (pkt_counter < nb_rx) {
+				//
+				uint16_t pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
+				struct rte_mbuf mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
 
-			strftime(filename, sizeof(filename), "/opt/log/packet_dump_%Y%m%d_%H%M%S", timenow);
+				// The function documentation is wrong. Cast type is 2nd parameter, additional offset is 3rd parameter
+				struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ether_hdr *, 0);
+				struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
+				struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 
-			FILE *fp;
-			fp = fopen(filename, "w");
-			rte_pktmbuf_dump(fp, bufs[0], data_len);
-			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
+				//ether frame
+				struct rte_ether_addr eth_src;
+				rte_ether_addr_copy(&eth_h->src_addr, &eth_src);
+				rte_ether_addr_copy(&eth_h->dst_addr, &eth_h->src_addr);
+				rte_ether_addr_copy(&eth_src, &eth_h->dst_addr);
 
-			uint16_t size = sizeof bufs / sizeof *bufs;
+				//ipv4
+				uint32_t ip_addr_src = ipv4_hdr->src_addr;
+				ipv4_hdr->src_addr = ipv4_hdr->dst_addr;
+				ipv4_hdr->dst_addr = ip_addr_src;
+
+				//icmp
+				icmp_hdr->icmp_cksum = 0;
+				icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
+				//TODO: calculate icmp packet size (data len - headers)
+				uint16_t cksum = rte_raw_cksum(icmp_hdr, 64);
+				icmp_hdr->icmp_cksum = (uint16_t)~~cksum;
+				++pkt_counter;
+			}
+
+// 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
+// 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
+// 			char filename[50];
+// 			struct tm *timenow;
+// 			time_t now = time(NULL);
+// 			timenow = gmtime(&now);
+
+// 			strftime(filename, sizeof(filename), "/opt/log/packet_dump_%Y%m%d_%H%M%S", timenow);
+
+// 			FILE *fp;
+// 			fp = fopen(filename, "w");
+// 			rte_pktmbuf_dump(fp, bufs[0], data_len);
+// 			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
+
+// 			uint16_t size = sizeof bufs / sizeof *bufs;
 			
-			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
-			char *data;
-			char *pointer;
-			char copy[data_len];
-			data =  rte_pktmbuf_mtod(bufs[0], char*);
-			uint16_t counter = 0;
-			for(pointer = data; pointer < data + data_len; ++pointer) {
-				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
-				copy[counter] = *pointer;
-				printf("\nLOGGING: Data Log [copy_val=%hhx]\n", copy[counter]);
+// 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
+// 			char *data;
+// 			char *pointer;
+// 			char copy[data_len];
+// 			data =  rte_pktmbuf_mtod(bufs[0], char*);
+// 			uint16_t counter = 0;
+// 			for(pointer = data; pointer < data + data_len; ++pointer) {
+// 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
+// 				copy[counter] = *pointer;
+// 				printf("\nLOGGING: Data Log [copy_val=%hhx]\n", copy[counter]);
 
-				++counter;
-				//LAB1: Failsafe
-				if (counter >= data_len+20) {
-					printf("\nLOGGING: Failsafe triggered\n");
-					break;
-				}
-			}
-			//LAB1: Print packet (for hardcoding purposes)
-			/*
-			ec:b1:d7:85:6a:13
-			Captured Packet
-			14 58 d0 58 
-			5f 33 ec b1 
-			d7 85 6a 13 
-			08 00 45 00 
-			00 54 7c 5d 
-			40 00 40 01 
-			3a f6 c0 a8 
-			01 02 c0 a8 
-			01 03 08 00 
-			2b 83 00 03 
-			00 01 8a 6e 
-			25 63 00 00 
-			00 00 59 d4 
-			04 00 00 00 
-			00 00 10 11 
-			12 13 14 15 
-			16 17 18 19 
-			1a 1b 1c 1d 
-			1e 1f 20 21 
-			22 23 24 25 
-			26 27 28 29 
-			2a 2b 2c 2d 
-			2e 2f 30 31 
-			32 33 34 35 
-			36 37
-====
-			14 58 d0 58 
-			5f 33 ec b1 
-			d7 85 6a 13 
-			// addresses^
-			08 00 45 00 
-			00 54 2d dd 
-			40 00 40 01 
-			89 76 c0 a8 
-			01 02 c0 a8 
-			01 03 08 00 
-			68 43 00 04 
-			//10^
-			00 01 89 70 
-			25 63 00 00 
-			00 00 1d 11 
-			05 00 00 00 
-			00 00 10 11 
-			12 13 14 15 
-			16 17 18 19 
-			1a 1b 1c 1d 
-			1e 1f 20 21 
-			22 23 24 25 
-			26 27 28 29 
-			2a 2b 2c 2d 
-			2e 2f 30 31 
-			32 33 34 35 
-			36 37 
-			=======
-			swapped addresses test
-			ec b1 d7 85 
-			6a 13 14 58 
-			d0 58 5f 33 
-			08 00 45 00 
-			00 54 63 ba 
-			40 00 40 01 
-			53 99 c0 a8 
-			01 02 c0 a8 
-			01 03 08 00 
-			37 4d 00 05 
-			00 01 a6 7e 
-			25 63 00 00 
-			00 00 33 f8 
-			02 00 00 00 
-			00 00 10 11 
-			12 13 14 15 
-			16 17 18 19 
-			1a 1b 1c 1d 
-			1e 1f 20 21 
-			22 23 24 25 
-			26 27 28 29 
-			2a 2b 2c 2d 
-			2e 2f 30 31 
-			32 33 34 35 
-			36 37
+// 				++counter;
+// 				//LAB1: Failsafe
+// 				if (counter >= data_len+20) {
+// 					printf("\nLOGGING: Failsafe triggered\n");
+// 					break;
+// 				}
+// 			}
+// 			//LAB1: Print packet (for hardcoding purposes)
+// 			/*
+// 			ec:b1:d7:85:6a:13
+// 			Captured Packet
+// 			14 58 d0 58 
+// 			5f 33 ec b1 
+// 			d7 85 6a 13 
+// 			08 00 45 00 
+// 			00 54 7c 5d 
+// 			40 00 40 01 
+// 			3a f6 c0 a8 
+// 			01 02 c0 a8 
+// 			01 03 08 00 
+// 			2b 83 00 03 
+// 			00 01 8a 6e 
+// 			25 63 00 00 
+// 			00 00 59 d4 
+// 			04 00 00 00 
+// 			00 00 10 11 
+// 			12 13 14 15 
+// 			16 17 18 19 
+// 			1a 1b 1c 1d 
+// 			1e 1f 20 21 
+// 			22 23 24 25 
+// 			26 27 28 29 
+// 			2a 2b 2c 2d 
+// 			2e 2f 30 31 
+// 			32 33 34 35 
+// 			36 37
+// ====
+// 			14 58 d0 58 
+// 			5f 33 ec b1 
+// 			d7 85 6a 13 
+// 			// addresses^
+// 			08 00 45 00 
+// 			00 54 2d dd 
+// 			40 00 40 01 
+// 			89 76 c0 a8 
+// 			01 02 c0 a8 
+// 			01 03 08 00 
+// 			68 43 00 04 
+// 			//10^
+// 			00 01 89 70 
+// 			25 63 00 00 
+// 			00 00 1d 11 
+// 			05 00 00 00 
+// 			00 00 10 11 
+// 			12 13 14 15 
+// 			16 17 18 19 
+// 			1a 1b 1c 1d 
+// 			1e 1f 20 21 
+// 			22 23 24 25 
+// 			26 27 28 29 
+// 			2a 2b 2c 2d 
+// 			2e 2f 30 31 
+// 			32 33 34 35 
+// 			36 37 
+// 			=======
+// 			swapped addresses test
+// 			ec b1 d7 85 
+// 			6a 13 14 58 
+// 			d0 58 5f 33 
+// 			08 00 45 00 
+// 			00 54 63 ba 
+// 			40 00 40 01 
+// 			53 99 c0 a8 
+// 			01 02 c0 a8 
+// 			01 03 08 00 
+// 			37 4d 00 05 
+// 			00 01 a6 7e 
+// 			25 63 00 00 
+// 			00 00 33 f8 
+// 			02 00 00 00 
+// 			00 00 10 11 
+// 			12 13 14 15 
+// 			16 17 18 19 
+// 			1a 1b 1c 1d 
+// 			1e 1f 20 21 
+// 			22 23 24 25 
+// 			26 27 28 29 
+// 			2a 2b 2c 2d 
+// 			2e 2f 30 31 
+// 			32 33 34 35 
+// 			36 37
 
-			===
-			swapped addresses packet:
-			swapped addresses
-			ec b1 d7 85 
-			6a 13 14 58 
-			d0 58 5f 33 
-			08 00 45 00 
-			00 54 67 ff 
-			40 00 40 01 
-			4f 54 c0 a8 
-			01 02 c0 a8 
-			01 03 08 00 
-			61 76 00 0a 
-			00 01 d5 2c 
-			26 63 00 00 
-			00 00 d2 1b 
-			0a 00 00 00 
-			00 00 10 11 
-			12 13 14 15 
-			16 17 18 19 
-			1a 1b 1c 1d 
-			1e 1f 20 21 
-			22 23 24 25 
-			26 27 28 29 
-			2a 2b 2c 2d 
-			2e 2f 30 31 
-			32 33 34 35 
-			36 37
+// 			===
+// 			swapped addresses packet:
+// 			swapped addresses
+// 			ec b1 d7 85 
+// 			6a 13 14 58 
+// 			d0 58 5f 33 
+// 			08 00 45 00 
+// 			00 54 67 ff 
+// 			40 00 40 01 
+// 			4f 54 c0 a8 
+// 			01 02 c0 a8 
+// 			01 03 08 00 
+// 			61 76 00 0a 
+// 			00 01 d5 2c 
+// 			26 63 00 00 
+// 			00 00 d2 1b 
+// 			0a 00 00 00 
+// 			00 00 10 11 
+// 			12 13 14 15 
+// 			16 17 18 19 
+// 			1a 1b 1c 1d 
+// 			1e 1f 20 21 
+// 			22 23 24 25 
+// 			26 27 28 29 
+// 			2a 2b 2c 2d 
+// 			2e 2f 30 31 
+// 			32 33 34 35 
+// 			36 37
 
-			checksum issues
-			nochange: 53381 -> D085
-			fromtype: 20990 -> 51FE
-			*/
-			//attempt to use ipv4 helpers
-			// struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(mbuf, struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
-			/* Handle IPv4 headers.*/
-			struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ether_hdr *, 0);
-			printf("\nLOGGING: Ether Header check\n");
-			printf("\nLOGGING: Destination Address\n");
-			char *prtp = (char *)(&(ether_hdr->dst_addr));
-			counter = 0;
-			while (counter < 6) {
-				printf("%02hhx ", *prtp);
-				++counter;
-				if (counter % 4 == 0)
-					printf("\n");
-				++prtp;
-			}
+// 			checksum issues
+// 			nochange: 53381 -> D085
+// 			fromtype: 20990 -> 51FE
+// 			*/
+// 			//attempt to use ipv4 helpers
+// 			// struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(mbuf, struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
+// 			/* Handle IPv4 headers.*/
+// 			struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ether_hdr *, 0);
+// 			printf("\nLOGGING: Ether Header check\n");
+// 			printf("\nLOGGING: Destination Address\n");
+// 			char *prtp = (char *)(&(ether_hdr->dst_addr));
+// 			counter = 0;
+// 			while (counter < 6) {
+// 				printf("%02hhx ", *prtp);
+// 				++counter;
+// 				if (counter % 4 == 0)
+// 					printf("\n");
+// 				++prtp;
+// 			}
 
-			printf("\nLOGGING: Source Address\n");
-			prtp = (char *)(&(ether_hdr->src_addr));
-			counter = 0;
-			while (counter < 6) {
-				printf("%02hhx ", *prtp);
-				++counter;
-				if (counter % 4 == 0)
-					printf("\n");
-				++prtp;
-			}
+// 			printf("\nLOGGING: Source Address\n");
+// 			prtp = (char *)(&(ether_hdr->src_addr));
+// 			counter = 0;
+// 			while (counter < 6) {
+// 				printf("%02hhx ", *prtp);
+// 				++counter;
+// 				if (counter % 4 == 0)
+// 					printf("\n");
+// 				++prtp;
+// 			}
 
 			
-			//calculate offset
-			// printf("\nLOGGING: IPv4 api check [bufs0_ptr=%p, header_ptr=%p, data_ptr=%p]\n", bufs[0], ipv4_hdr, data);
-			//print checksum from helpers
-			// printf("\nLOGGING: IPv4 api check [header_checksum=%u]\n", ipv4_hdr->hdr_checksum);
+// 			//calculate offset
+// 			// printf("\nLOGGING: IPv4 api check [bufs0_ptr=%p, header_ptr=%p, data_ptr=%p]\n", bufs[0], ipv4_hdr, data);
+// 			//print checksum from helpers
+// 			// printf("\nLOGGING: IPv4 api check [header_checksum=%u]\n", ipv4_hdr->hdr_checksum);
 			
-			//print from bufs[0] to data
-			// printf("\nLOGGING: BUFS[0] to data\n");
-			// prtp = (char *)bufs[0];
-			// counter = 0;
-			// while (prtp != data) {
-			// 	printf("%02hhx ", *prtp);
-			// 	++counter;
-			// 	if (counter % 4 == 0)
-			// 		printf("\n");
-			// 	++prtp;
-			// }
-			/*
-			LOGGING: IPv4 api check [bufs0_ptr=0x100789800, header_ptr=0x10078990e, data_ptr=0x100789900]
-			LOGGING: IPv4 api check [header_checksum=17297]
+// 			//print from bufs[0] to data
+// 			// printf("\nLOGGING: BUFS[0] to data\n");
+// 			// prtp = (char *)bufs[0];
+// 			// counter = 0;
+// 			// while (prtp != data) {
+// 			// 	printf("%02hhx ", *prtp);
+// 			// 	++counter;
+// 			// 	if (counter % 4 == 0)
+// 			// 		printf("\n");
+// 			// 	++prtp;
+// 			// }
+// 			/*
+// 			LOGGING: IPv4 api check [bufs0_ptr=0x100789800, header_ptr=0x10078990e, data_ptr=0x100789900]
+// 			LOGGING: IPv4 api check [header_checksum=17297]
 
-			LOGGING: BUFS[0] to data
-			80 98 78 00 
-			01 00 00 00 
-			80 98 78 86 
-			0f 00 00 00 
-			80 00 01 00 
-			01 00 01 00 
-			02 00 00 00 
-			00 00 00 00 
-			91 06 00 00 
-			62 00 00 00 
-			62 00 00 00 
-			e2 08 e9 ea 
-			00 00 00 00 
-			00 00 80 08 
-			c0 e4 21 00 
-			01 00 00 00
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00 
-			00 00 00 00
-			*/
+// 			LOGGING: BUFS[0] to data
+// 			80 98 78 00 
+// 			01 00 00 00 
+// 			80 98 78 86 
+// 			0f 00 00 00 
+// 			80 00 01 00 
+// 			01 00 01 00 
+// 			02 00 00 00 
+// 			00 00 00 00 
+// 			91 06 00 00 
+// 			62 00 00 00 
+// 			62 00 00 00 
+// 			e2 08 e9 ea 
+// 			00 00 00 00 
+// 			00 00 80 08 
+// 			c0 e4 21 00 
+// 			01 00 00 00
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00 
+// 			00 00 00 00
+// 			*/
 
 
-			//check checksums (shouldn't be needed)
-			// struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
-			// struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
-			//0 out checksum
-			// prtp = data+sizeof(data[0])*12;
-			// counter = 0;
-			// printf("\nLOGGING: Original checksum\n");
-			// //TODO: move this to a function for printing data
-			// for (; counter < 4; ++prtp )
-			// {
-			// 	printf("%02hhx ", *prtp);
-			// 	++counter;
-			// 	if (counter % 4 == 0)
-			// 		printf("\n");
-			// }
-			// strcpy( data+sizeof(data[0])*14, "\x00\x00");
-			// prtp = data+sizeof(data[0])*12;
-			// counter = 0;
-			// printf("\nLOGGING: Testing checksum manipulation\n");
-			// //TODO: move this to a function for printing data
-			// for (; counter < 4; ++prtp )
-			// {
-			// 	printf("%02hhx ", *prtp);
-			// 	++counter;
-			// 	if (counter % 4 == 0)
-			// 		printf("\n");
-			// }
+// 			//check checksums (shouldn't be needed)
+// 			// struct rte_ipv4_hdr *ipv4_hdr_nochange = (struct rte_ipv4_hdr*)data;
+// 			// struct rte_ipv4_hdr *ipv4_hdr_fromtype = (struct rte_ipv4_hdr*)(data+sizeof(data[0])*12);
+// 			//0 out checksum
+// 			// prtp = data+sizeof(data[0])*12;
+// 			// counter = 0;
+// 			// printf("\nLOGGING: Original checksum\n");
+// 			// //TODO: move this to a function for printing data
+// 			// for (; counter < 4; ++prtp )
+// 			// {
+// 			// 	printf("%02hhx ", *prtp);
+// 			// 	++counter;
+// 			// 	if (counter % 4 == 0)
+// 			// 		printf("\n");
+// 			// }
+// 			// strcpy( data+sizeof(data[0])*14, "\x00\x00");
+// 			// prtp = data+sizeof(data[0])*12;
+// 			// counter = 0;
+// 			// printf("\nLOGGING: Testing checksum manipulation\n");
+// 			// //TODO: move this to a function for printing data
+// 			// for (; counter < 4; ++prtp )
+// 			// {
+// 			// 	printf("%02hhx ", *prtp);
+// 			// 	++counter;
+// 			// 	if (counter % 4 == 0)
+// 			// 		printf("\n");
+// 			// }
 
-			//Calculate checksum with 2 potential starts for the header pointer
-			// uint16_t cksum;
-			// cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
-			// printf("\nLOGGING: Testing checksum calculation [cksum_nochange=%u]\n", (uint16_t)~cksum);
-			//Check if the checksum is automatically updated
-			// prtp = data+sizeof(data[0])*12;
-			// counter = 0;
-			// printf("\nLOGGING: Testing checksum manipulation\n");
-			//TODO: move this to a function for printing data
-			// for (; counter < 4; ++prtp )
-			// {
-			// 	printf("%02hhx ", *prtp);
-			// 	++counter;
-			// 	if (counter % 4 == 0)
-			// 		printf("\n");
-			// }
-			//0 out checksum, in case it was manipulated
-			// strcpy( data+sizeof(data[0])*14, "\x00\x00");
-			// prtp = data+sizeof(data[0])*12;
-			// counter = 0;
-			// printf("\nLOGGING: Testing checksum manipulation\n");
-			//TODO: move this to a function for printing data
-			// for (; counter < 4; ++prtp )
-			// {
-			// 	printf("%02hhx ", *prtp);
-			// 	++counter;
-			// 	if (counter % 4 == 0)
-			// 		printf("\n");
-			// }
+// 			//Calculate checksum with 2 potential starts for the header pointer
+// 			// uint16_t cksum;
+// 			// cksum = rte_raw_cksum(ipv4_hdr_nochange, rte_ipv4_hdr_len(ipv4_hdr_nochange));
+// 			// printf("\nLOGGING: Testing checksum calculation [cksum_nochange=%u]\n", (uint16_t)~cksum);
+// 			//Check if the checksum is automatically updated
+// 			// prtp = data+sizeof(data[0])*12;
+// 			// counter = 0;
+// 			// printf("\nLOGGING: Testing checksum manipulation\n");
+// 			//TODO: move this to a function for printing data
+// 			// for (; counter < 4; ++prtp )
+// 			// {
+// 			// 	printf("%02hhx ", *prtp);
+// 			// 	++counter;
+// 			// 	if (counter % 4 == 0)
+// 			// 		printf("\n");
+// 			// }
+// 			//0 out checksum, in case it was manipulated
+// 			// strcpy( data+sizeof(data[0])*14, "\x00\x00");
+// 			// prtp = data+sizeof(data[0])*12;
+// 			// counter = 0;
+// 			// printf("\nLOGGING: Testing checksum manipulation\n");
+// 			//TODO: move this to a function for printing data
+// 			// for (; counter < 4; ++prtp )
+// 			// {
+// 			// 	printf("%02hhx ", *prtp);
+// 			// 	++counter;
+// 			// 	if (counter % 4 == 0)
+// 			// 		printf("\n");
+// 			// }
 
-			// cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
-			struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
-			struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
-			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
-			uint16_t cksum_original = (uint16_t)icmp_hdr->icmp_cksum;
-			printf("\nLOGGING: Testing checksum calculation [cksum_original_copy=%u]\n", cksum_original);
-//operation: 50707
-//original: 50698
+// 			// cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
+// 			struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
+// 			struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
+// 			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
+// 			uint16_t cksum_original = (uint16_t)icmp_hdr->icmp_cksum;
+// 			printf("\nLOGGING: Testing checksum calculation [cksum_original_copy=%u]\n", cksum_original);
+// //operation: 50707
+// //original: 50698
 
-//should be: 50706
-			icmp_hdr->icmp_cksum = 0;
-			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
-			// uint32_t cksum;
-			uint16_t cksum = rte_raw_cksum(icmp_hdr, 64);
-			printf("\nLOGGING: Testing checksum calculation [cksum_updated_helper=%u]\n", (uint16_t)~cksum);
+// //should be: 50706
+// 			icmp_hdr->icmp_cksum = 0;
+// 			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
+// 			// uint32_t cksum;
+// 			uint16_t cksum = rte_raw_cksum(icmp_hdr, 64);
+// 			printf("\nLOGGING: Testing checksum calculation [cksum_updated_helper=%u]\n", (uint16_t)~cksum);
 
-			icmp_hdr->icmp_cksum = cksum_original;
-			cksum = ~icmp_hdr->icmp_cksum & 0xffff;
-			cksum += ~RTE_BE16(RTE_IP_ICMP_ECHO_REQUEST << 8) & 0xffff;
-			cksum += RTE_BE16(RTE_IP_ICMP_ECHO_REPLY << 8);
-			cksum = (cksum & 0xffff) + (cksum >> 16);
-			cksum = (cksum & 0xffff) + (cksum >> 16);
+// 			// icmp_hdr->icmp_cksum = cksum_original;
+// 			// cksum = ~icmp_hdr->icmp_cksum & 0xffff;
+// 			// cksum += ~RTE_BE16(RTE_IP_ICMP_ECHO_REQUEST << 8) & 0xffff;
+// 			// cksum += RTE_BE16(RTE_IP_ICMP_ECHO_REPLY << 8);
+// 			// cksum = (cksum & 0xffff) + (cksum >> 16);
+// 			// cksum = (cksum & 0xffff) + (cksum >> 16);
 
-			printf("\nLOGGING: Testing checksum calculation [cksum_updated=%u]\n", (uint16_t)~cksum);
-			// icmp_hdr->icmp_cksum = ~cksum;
-			uint16_t overflow_diff = 65535-icmp_hdr->icmp_cksum;
-			if (overflow_diff < 8) {
-				icmp_hdr->icmp_cksum = 8-overflow_diff;
-			} else {
-				icmp_hdr->icmp_cksum = cksum_original+8;
-			}
+// 			// printf("\nLOGGING: Testing checksum calculation [cksum_updated=%u]\n", (uint16_t)~cksum);
+// 			// icmp_hdr->icmp_cksum = ~cksum;
+// 			uint16_t overflow_diff = 65535-icmp_hdr->icmp_cksum;
+// 			if (overflow_diff < 8) {
+// 				icmp_hdr->icmp_cksum = 8-overflow_diff;
+// 			} else {
+// 				icmp_hdr->icmp_cksum = cksum_original+8;
+// 			}
 
-			//ipv4
-			uint32_t ip_addr_src = ipv4_hdr->src_addr;
-			ipv4_hdr->src_addr = ipv4_hdr->dst_addr;
-			ipv4_hdr->dst_addr = ip_addr_src;
+// 			//ipv4
+// 			uint32_t ip_addr_src = ipv4_hdr->src_addr;
+// 			ipv4_hdr->src_addr = ipv4_hdr->dst_addr;
+// 			ipv4_hdr->dst_addr = ip_addr_src;
 
-			// Address Swap. bufs[0] / data will be mutated. Copy will stay the same
-			if (data_len == 98) {
-				memcpy(&data[0], &copy[6], 6 * sizeof(data[0]));
-				memcpy(&data[6], &copy[0], 6 * sizeof(data[0]));
-			}
+// 			// Address Swap. bufs[0] / data will be mutated. Copy will stay the same
+// 			if (data_len == 98) {
+// 				memcpy(&data[0], &copy[6], 6 * sizeof(data[0]));
+// 				memcpy(&data[6], &copy[0], 6 * sizeof(data[0]));
+// 			}
 			
-			printf("\nLOGGING: Confirm swapped addresses\n");
-			data =  rte_pktmbuf_mtod(bufs[0], char*);
-			counter = 0;
-			for(pointer = data; pointer < data + data_len; ++pointer) {
-				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
+// 			printf("\nLOGGING: Confirm swapped addresses\n");
+// 			data =  rte_pktmbuf_mtod(bufs[0], char*);
+// 			counter = 0;
+// 			for(pointer = data; pointer < data + data_len; ++pointer) {
+// 				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
 
-				++counter;
-				//LAB1: Failsafe
-				if (counter >= data_len+20) {
-					printf("\nLOGGING: Failsafe triggered\n");
-					break;
-				}
-			}
-			//Dump to file
-			// char filename[40];
-			// struct tm *timenow;
-			// time_t now = time(NULL);
-			// timenow = gmtime(&now);
+// 				++counter;
+// 				//LAB1: Failsafe
+// 				if (counter >= data_len+20) {
+// 					printf("\nLOGGING: Failsafe triggered\n");
+// 					break;
+// 				}
+// 			}
+// 			//Dump to file
+// 			// char filename[40];
+// 			// struct tm *timenow;
+// 			// time_t now = time(NULL);
+// 			// timenow = gmtime(&now);
 
-			strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
+// 			strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
 
-			fclose(fp);
-			fp = fopen(filename, "w");
-			rte_pktmbuf_dump(fp, bufs[0], data_len);
-			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
+// 			fclose(fp);
+// 			fp = fopen(filename, "w");
+// 			rte_pktmbuf_dump(fp, bufs[0], data_len);
+// 			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
 
 			// prtp = copy;
 			// counter = 0;
