@@ -177,7 +177,7 @@ lcore_main(void)
 
 			FILE *fp;
 			fp = fopen(filename, "w");
-			rte_pktmbuf_dump(fp, bufs[0], data_len+128);
+			rte_pktmbuf_dump(fp, bufs[0], data_len);
 			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
 
 			uint16_t size = sizeof bufs / sizeof *bufs;
