@@ -10,8 +10,9 @@
 #include <rte_lcore.h>
 #include <rte_mbuf.h>
 
-//LAB1: Sleep
+//LAB1
 #include <unistd.h>
+#include <time.h>
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
@@ -166,6 +167,18 @@ lcore_main(void)
 		    sleep(1);
 
 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
+			char filename[40];
+			struct tm *timenow;
+			time_t now = time(NULL);
+			timenow = gmtime(&now);
+
+			strftime(filename, sizeof(filename), "/opt/log/packet_dump_%Y%m%d_%H%M%S", timenow);
+
+			FILE *fp;
+			fp = fopen(filename, "w");
+			rte_pktmbuf_dump(fp, bufs[0]);
+			printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
+
 			uint16_t size = sizeof bufs / sizeof *bufs;
 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
 			printf("\nLOGGING: bufs struct array data [bufs_size=%u, bufs0_data_len=%u]\n", size, data_len);
@@ -242,66 +255,66 @@ lcore_main(void)
 			2e 2f 30 31 
 			32 33 34 35 
 			36 37 
-=======
-swapped addresses test
-ec b1 d7 85 
-6a 13 14 58 
-d0 58 5f 33 
-08 00 45 00 
-00 54 63 ba 
-40 00 40 01 
-53 99 c0 a8 
-01 02 c0 a8 
-01 03 08 00 
-37 4d 00 05 
-00 01 a6 7e 
-25 63 00 00 
-00 00 33 f8 
-02 00 00 00 
-00 00 10 11 
-12 13 14 15 
-16 17 18 19 
-1a 1b 1c 1d 
-1e 1f 20 21 
-22 23 24 25 
-26 27 28 29 
-2a 2b 2c 2d 
-2e 2f 30 31 
-32 33 34 35 
-36 37
+			=======
+			swapped addresses test
+			ec b1 d7 85 
+			6a 13 14 58 
+			d0 58 5f 33 
+			08 00 45 00 
+			00 54 63 ba 
+			40 00 40 01 
+			53 99 c0 a8 
+			01 02 c0 a8 
+			01 03 08 00 
+			37 4d 00 05 
+			00 01 a6 7e 
+			25 63 00 00 
+			00 00 33 f8 
+			02 00 00 00 
+			00 00 10 11 
+			12 13 14 15 
+			16 17 18 19 
+			1a 1b 1c 1d 
+			1e 1f 20 21 
+			22 23 24 25 
+			26 27 28 29 
+			2a 2b 2c 2d 
+			2e 2f 30 31 
+			32 33 34 35 
+			36 37
 
-===
-swapped addresses packet:
-swapped addresses
-ec b1 d7 85 
-6a 13 14 58 
-d0 58 5f 33 
-08 00 45 00 
-00 54 67 ff 
-40 00 40 01 
-4f 54 c0 a8 
-01 02 c0 a8 
-01 03 08 00 
-61 76 00 0a 
-00 01 d5 2c 
-26 63 00 00 
-00 00 d2 1b 
-0a 00 00 00 
-00 00 10 11 
-12 13 14 15 
-16 17 18 19 
-1a 1b 1c 1d 
-1e 1f 20 21 
-22 23 24 25 
-26 27 28 29 
-2a 2b 2c 2d 
-2e 2f 30 31 
-32 33 34 35 
-36 37
+			===
+			swapped addresses packet:
+			swapped addresses
+			ec b1 d7 85 
+			6a 13 14 58 
+			d0 58 5f 33 
+			08 00 45 00 
+			00 54 67 ff 
+			40 00 40 01 
+			4f 54 c0 a8 
+			01 02 c0 a8 
+			01 03 08 00 
+			61 76 00 0a 
+			00 01 d5 2c 
+			26 63 00 00 
+			00 00 d2 1b 
+			0a 00 00 00 
+			00 00 10 11 
+			12 13 14 15 
+			16 17 18 19 
+			1a 1b 1c 1d 
+			1e 1f 20 21 
+			22 23 24 25 
+			26 27 28 29 
+			2a 2b 2c 2d 
+			2e 2f 30 31 
+			32 33 34 35 
+			36 37
 
-checksum issues
-nochange: 53381 -> D085
-fromtype: 20990 -> 51FE
+			checksum issues
+			nochange: 53381 -> D085
+			fromtype: 20990 -> 51FE
 			*/
 			//attempt to use ipv4 helpers
 			/* Handle IPv4 headers.*/
@@ -324,6 +337,69 @@ fromtype: 20990 -> 51FE
 					printf("\n");
 				++prtp;
 			}
+			/*
+			LOGGING: IPv4 api check [bufs0_ptr=0x100789800, header_ptr=0x10078990e, data_ptr=0x100789900]
+			LOGGING: IPv4 api check [header_checksum=17297]
+
+			LOGGING: BUFS[0] to data
+			80 98 78 00 
+			01 00 00 00 
+			80 98 78 86 
+			0f 00 00 00 
+			80 00 01 00 
+			01 00 01 00 
+			02 00 00 00 
+			00 00 00 00 
+			91 06 00 00 
+			62 00 00 00 
+			62 00 00 00 
+			e2 08 e9 ea 
+			00 00 00 00 
+			00 00 80 08 
+			c0 e4 21 00 
+			01 00 00 00
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00 
+			00 00 00 00
+			*/
 
 
 			//check checksums
