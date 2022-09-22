@@ -168,7 +168,7 @@ lcore_main(void)
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
 			struct rte_icmp_hdr *icmp_hdr;
-			struct rte_ether_addr eth_src;
+			struct rte_ether_addr ether_src;
 			uint32_t ip_addr_src;
 			uint16_t cksum;
 
@@ -184,9 +184,9 @@ lcore_main(void)
 				icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 
 				//ether frame
-				rte_ether_addr_copy(&eth_h->src_addr, &eth_src);
-				rte_ether_addr_copy(&eth_h->dst_addr, &eth_h->src_addr);
-				rte_ether_addr_copy(&eth_src, &eth_h->dst_addr);
+				rte_ether_addr_copy(&ether_hdr->src_addr, &ether_src);
+				rte_ether_addr_copy(&ether_hdr->dst_addr, &ether_hdr->src_addr);
+				rte_ether_addr_copy(&ether_src, &ether_hdr->dst_addr);
 
 				//ipv4
 				ip_addr_src = ipv4_hdr->src_addr;
