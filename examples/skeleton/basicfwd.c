@@ -491,7 +491,10 @@ lcore_main(void)
 			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
 			uint16_t cksum_original = (uint16_t)icmp_hdr->icmp_cksum;
 			printf("\nLOGGING: Testing checksum calculation [cksum_original_copy=%u]\n", cksum_original);
+//operation: 50707
+//original: 50698
 
+//should be: 50706
 			icmp_hdr->icmp_cksum = 0;
 			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
 			// uint32_t cksum;
@@ -506,7 +509,8 @@ lcore_main(void)
 			cksum = (cksum & 0xffff) + (cksum >> 16);
 
 			printf("\nLOGGING: Testing checksum calculation [cksum_updated=%u]\n", (uint16_t)~cksum);
-			icmp_hdr->icmp_cksum = ~cksum;
+			// icmp_hdr->icmp_cksum = ~cksum;
+			icmp_hdr->icmp_cksum = cksum_original+8;
 
 			//ipv4
 			uint32_t ip_addr_src = ipv4_hdr->src_addr;
