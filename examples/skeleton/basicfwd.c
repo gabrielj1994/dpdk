@@ -168,7 +168,7 @@ lcore_main(void)
 
 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
-			char filename[40];
+			char filename[50];
 			struct tm *timenow;
 			time_t now = time(NULL);
 			timenow = gmtime(&now);
