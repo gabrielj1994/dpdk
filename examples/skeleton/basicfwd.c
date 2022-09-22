@@ -486,7 +486,7 @@ lcore_main(void)
 			// }
 
 			// cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
-			struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hd4*, sizeof(struct rte_ether_hdr));
+			struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
 			struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
 			icmp_hdr->icmp_cksum = 0;
