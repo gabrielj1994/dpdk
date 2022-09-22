@@ -489,16 +489,22 @@ lcore_main(void)
 			struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
 			struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
-			// icmp_hdr->icmp_cksum = 0;
+			uint16_t cksum_original = (uint16_t)icmp_hdr->icmp_cksum;
+			printf("\nLOGGING: Testing checksum calculation [cksum_original_copy=%u]\n", cksum_original);
+
+			icmp_hdr->icmp_cksum = 0;
 			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
-			uint16_t cksum;
-			// uint16_t cksum = rte_raw_cksum(icmp_hdr, sizeof(struct rte_icmp_hdr));
+			// uint32_t cksum;
+			uint16_t cksum = rte_raw_cksum(icmp_hdr, 8);
+			printf("\nLOGGING: Testing checksum calculation [cksum_updated_helper=%u]\n", (uint16_t)~cksum);
+
+			icmp_hdr->icmp_cksum = cksum_original;
 			cksum = ~icmp_hdr->icmp_cksum & 0xffff;
 			cksum += ~RTE_BE16(RTE_IP_ICMP_ECHO_REQUEST << 8) & 0xffff;
 			cksum += RTE_BE16(RTE_IP_ICMP_ECHO_REPLY << 8);
 			cksum = (cksum & 0xffff) + (cksum >> 16);
 			cksum = (cksum & 0xffff) + (cksum >> 16);
-			
+
 			printf("\nLOGGING: Testing checksum calculation [cksum_updated=%u]\n", (uint16_t)~cksum);
 			icmp_hdr->icmp_cksum = ~cksum;
 
