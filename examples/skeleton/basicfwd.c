@@ -495,7 +495,7 @@ lcore_main(void)
 			icmp_hdr->icmp_cksum = 0;
 			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
 			// uint32_t cksum;
-			uint16_t cksum = rte_raw_cksum(icmp_hdr, 8);
+			uint16_t cksum = rte_raw_cksum(icmp_hdr, 16);
 			printf("\nLOGGING: Testing checksum calculation [cksum_updated_helper=%u]\n", (uint16_t)~cksum);
 
 			icmp_hdr->icmp_cksum = cksum_original;
