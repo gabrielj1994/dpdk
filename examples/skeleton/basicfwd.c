@@ -205,7 +205,7 @@ lcore_main(void)
 				icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
 				//TODO: calculate icmp packet size (data len - headers)
 				cksum = rte_raw_cksum(icmp_hdr, 64);
-				icmp_hdr->icmp_cksum = (uint16_t)~~cksum;
+				icmp_hdr->icmp_cksum = (uint16_t)~cksum;
 
 				strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
 
