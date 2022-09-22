@@ -176,12 +176,13 @@ lcore_main(void)
 			while (pkt_counter < nb_rx) {
 				//
 				pkt_len = rte_pktmbuf_pkt_len(bufs[pkt_counter]);
-				mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
+				//todo: is this needed?
+				// mbuf = rte_pktmbuf_mtod(bufs[pkt_counter], struct rte_mbuf *);
 
 				// The function documentation is wrong. Cast type is 2nd parameter, additional offset is 3rd parameter
 				ether_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ether_hdr *, 0);
-				ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hdr*, sizeof(struct rte_ether_hdr));
-				icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
+				ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ipv4_hdr *, sizeof(struct rte_ether_hdr));
+				icmp_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_icmp_hdr *, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 
 				//ether frame
 				rte_ether_addr_copy(&ether_hdr->src_addr, &ether_src);
