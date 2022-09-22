@@ -184,7 +184,6 @@ lcore_main(void)
 				icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 
 				//ether frame
-				eth_src;
 				rte_ether_addr_copy(&eth_h->src_addr, &eth_src);
 				rte_ether_addr_copy(&eth_h->dst_addr, &eth_h->src_addr);
 				rte_ether_addr_copy(&eth_src, &eth_h->dst_addr);
