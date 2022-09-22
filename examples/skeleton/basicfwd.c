@@ -486,13 +486,21 @@ lcore_main(void)
 			// }
 
 			// cksum = rte_raw_cksum(ipv4_hdr_fromtype, rte_ipv4_hdr_len(ipv4_hdr_fromtype));
+			struct rte_ipv4_hdr *ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ipv4_hd4*, sizeof(struct rte_ether_hdr));
 			struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 			printf("\nLOGGING: Testing checksum calculation [cksum_original=%u]\n", (uint16_t)icmp_hdr->icmp_cksum);
 			icmp_hdr->icmp_cksum = 0;
 			icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
-			uint16_t cksum = rte_raw_cksum(icmp_hdr, sizeof(icmp_hdr));
+			uint16_t cksum = rte_raw_cksum(icmp_hdr, sizeof(struct rte_icmp_hdr));
+			
 			printf("\nLOGGING: Testing checksum calculation [cksum_updated=%u]\n", (uint16_t)~cksum);
 			icmp_hdr->icmp_cksum = (rte_be16_t)~cksum;
+
+			//ipv4
+			uint32_t ip_addr_src = ipv4_hdr->src_addr;
+			ipv4_hdr->src_addr = ipv4_hdr->dst_addr;
+			ipv4_hdr->dst_addr = ip_addr_src;
+
 			// Address Swap. bufs[0] / data will be mutated. Copy will stay the same
 			if (data_len == 98) {
 				memcpy(&data[0], &copy[6], 6 * sizeof(data[0]));
