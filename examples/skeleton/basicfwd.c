@@ -164,7 +164,7 @@ lcore_main(void)
 				continue;
 
 			uint16_t pkt_len;
-			struct rte_mbuf mbuf;
+			struct rte_mbuf *mbuf;
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
 			struct rte_icmp_hdr *icmp_hdr;
