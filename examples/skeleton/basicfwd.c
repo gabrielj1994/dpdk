@@ -321,7 +321,7 @@ lcore_main(void)
 			//attempt to use ipv4 helpers
 			// struct rte_icmp_hdr *icmp_hdr = rte_pktmbuf_mtod_offset(mbuf, struct rte_icmp_hdr*, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
 			/* Handle IPv4 headers.*/
-			struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(buf[0], struct rte_ether_hdr *, 0);
+			struct rte_ether_hdr *ether_hdr = rte_pktmbuf_mtod_offset(bufs[0], struct rte_ether_hdr *, 0);
 			printf("\nLOGGING: Ether Header check\n");
 			printf("\nLOGGING: Destination Address\n");
 			char *prtp = &(ether_hdr->dst_addr);
