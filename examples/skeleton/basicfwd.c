@@ -169,6 +169,40 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
+			// Capture a whole packet
+			char *data;
+			char *prtp = (char *)bufs[0];
+			data =  rte_pktmbuf_mtod(bufs[0], char*);
+			uint16_t pkt_len = rte_pktmbuf_pkt_len(bufs[0]);
+
+			//print from bufs[0] to data
+			printf("\nLOGGING: BUFS[0] to data\n");
+			uint16_t counter = 0;
+			while (prtp != data) {
+				printf("%02hhx ", *prtp);
+				++counter;
+				if (counter % 4 == 0)
+					printf("\n");
+				++prtp;
+			}
+
+			printf("\nLOGGING: Counter log [counter=%u]\n", counter);
+
+			uint16_t counter = 0;
+			for(prtp = data; pointer < data + data_len; ++prtp) {
+				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
+				++counter;
+				//LAB1: Failsafe
+				if (counter >= pkt_len+20) {
+					printf("\nLOGGING: Failsafe triggered\n");
+					break;
+				}
+			}
+			continue;
+
+
+			//print whole packet
+
 			// uint16_t pkt_len;
 			// struct rte_mbuf *mbuf;
 			struct rte_ether_hdr *ether_hdr;
