@@ -190,7 +190,7 @@ lcore_main(void)
 
 			counter = 0;
 			for(prtp = data; prtp < data + pkt_len; ++prtp) {
-				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *pointer);
+				printf("\nLOGGING: Data Log [position=%u, char_val=%hhx]\n", counter, *prtp);
 				++counter;
 				//LAB1: Failsafe
 				if (counter >= pkt_len+20) {
