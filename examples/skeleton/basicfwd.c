@@ -145,11 +145,11 @@ lcore_main(void)
 	/* Main work of application loop. 8< */
 	//LAB1: only loop once
 	for (;;) {
-		char filename[50];
-		struct tm *timenow;
-		time_t now = time(NULL);
-		timenow = gmtime(&now);
-		FILE *fp;
+		// char filename[50];
+		// struct tm *timenow;
+		// time_t now = time(NULL);
+		// timenow = gmtime(&now);
+		// FILE *fp;
 
 		/*
 		 * Receive packets on a port and forward them on the paired
@@ -207,14 +207,14 @@ lcore_main(void)
 				cksum = rte_raw_cksum(icmp_hdr, 64);
 				icmp_hdr->icmp_cksum = (uint16_t)~cksum;
 
-				strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
+				// strftime(filename, sizeof(filename), "/opt/log/reply_packet_dump_%Y%m%d_%H%M%S", timenow);
 
-				fp = fopen(filename, "w");
-				rte_pktmbuf_dump(fp, bufs[pkt_counter], pkt_len);
-				printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
+				// fp = fopen(filename, "w");
+				// rte_pktmbuf_dump(fp, bufs[pkt_counter], pkt_len);
+				// printf("\nLOGGING: Packets dumped to file [filename=%s]\n", filename);
 				++pkt_counter;
 			}
-			fclose(fp);
+			// fclose(fp);
 
 
 // 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
@@ -633,7 +633,7 @@ lcore_main(void)
 			}
 		}
 		//LAB1: sleep 3 seconds
-		sleep(1);
+		// sleep(1);
 	}
 	/* >8 End of loop. */
 }
