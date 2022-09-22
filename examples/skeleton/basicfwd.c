@@ -162,9 +162,6 @@ lcore_main(void)
 
 			if (unlikely(nb_rx == 0))
 				continue;
-			
-			//LAB1: sleep 1 seconds
-		    sleep(1);
 
 			printf("\nLOGGING: Burst of RX packets retrieved [portid=%u, nb_rx=%u]\n", port, nb_rx);
 			uint16_t data_len = rte_pktmbuf_pkt_len(bufs[0]);
@@ -562,12 +559,12 @@ lcore_main(void)
 			/* Send burst of TX packets, to second port of pair. */
 			// const uint16_t nb_tx = rte_eth_tx_burst(port ^ 1, 0,
 			// 		bufs, nb_rx);
-			//LAB1: No TX, only receive
-			const uint16_t nb_tx = 0;
-			// const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
-			// 		bufs, nb_rx);
+			//LAB1:
+			// const uint16_t nb_tx = 0;
+			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
+					bufs, nb_rx);
 
-			// printf("\nLOGGING: Burst of TX packets to second port passed [portid=%u]\n", port);
+			printf("\nLOGGING: Burst of TX packets to second port passed [nb_tx=%u]\n", nb_tx);
 
 			/* Free any unsent packets. */
 			if (unlikely(nb_tx < nb_rx)) {
@@ -577,7 +574,7 @@ lcore_main(void)
 			}
 		}
 		//LAB1: sleep 3 seconds
-		sleep(3);
+		sleep(1);
 	}
 	/* >8 End of loop. */
 }
