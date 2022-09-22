@@ -169,7 +169,7 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
-			uint16_t pkt_len;
+			// uint16_t pkt_len;
 			// struct rte_mbuf *mbuf;
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
