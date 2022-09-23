@@ -207,7 +207,7 @@ lcore_main(void)
 			elapsed_cycles = rte_rdtsc_precise() - begin; 
 			microseconds = elapsed_cycles * 1000000 / hz;
 
-			printf("\nLOGGING: ICMP Echo Request received and ICMP Echo Reply transmitted [nb_tx=%u, logic_overhead_time=%" PRIu64 "]\n", nb_tx, microseconds);
+			printf("\nLOGGING: ICMP Echo Request received and ICMP Echo Reply transmitted [nb_tx=%u, logic_overhead_time=%" PRIu64 " microseconds]\n", nb_tx, microseconds);
 			/* Free any unsent packets. */
 			if (unlikely(nb_tx < nb_rx)) {
 				uint16_t buf;
