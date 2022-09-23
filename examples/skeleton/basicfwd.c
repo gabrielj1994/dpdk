@@ -191,10 +191,7 @@ lcore_main(struct rte_mempool *mbuf_pool)
 		RTE_ETH_FOREACH_DEV(port) {
 			// MIT 6.5810 LAB 1: Only use port1
 			if (port != 1) continue;
-
 			
-			
-
 			/* Send ICMP echo request through TX packets. */
 			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
 					bufs, request_size);
