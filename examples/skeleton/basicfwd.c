@@ -192,7 +192,7 @@ lcore_main(void)
 				icmp_hdr->icmp_cksum = 0;
 				icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
 				// cksum = rte_raw_cksum(icmp_hdr, 64);
-				printf("\nLOGGING: ICMP packet length [len=%u]\n", pkt_len-(sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr)));
+				printf("\nLOGGING: ICMP packet length [len=%lu]\n", pkt_len-(sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr)));
 				cksum = rte_raw_cksum(icmp_hdr, pkt_len-(sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr)));
 				icmp_hdr->icmp_cksum = (uint16_t)~cksum;
 
