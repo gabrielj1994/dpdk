@@ -223,6 +223,7 @@ lcore_main(struct rte_mempool *mbuf_pool)
 				}
 				rte_pktmbuf_free(bufs[0]);
 			}
+		  	sleep(1);
 		}
 	}
 	/* >8 End of loop. */
