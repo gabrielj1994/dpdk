@@ -366,7 +366,7 @@ lcore_main(void)
 
 				if (microseconds < 10000000) {
 					//TODO: output metrics
-					printf("\nLOGGING: ICMP Echo Statistics [packets_transmitted=%u, packets_received=%u, time=%u microseconds]\n", request_size, request_size, microseconds);
+					printf("\nLOGGING: ICMP Echo Statistics [packets_transmitted=%u, packets_received=%u, time=%lu microseconds]\n", request_size, request_size, microseconds);
 
 				} else {
 					printf("\nLOGGING: ICMP Echo request timeout after 10 seconds\n");
