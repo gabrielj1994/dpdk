@@ -290,7 +290,7 @@ lcore_main(void)
 					break;
 				}
 			}
-			continue;
+			// continue;
 
 
 			// //print whole packet
@@ -350,7 +350,6 @@ lcore_main(void)
 
 			uint64_t hz = rte_get_timer_hz(); 
 			uint64_t begin = rte_rdtsc_precise(); 
-			// Do something
 			uint64_t elapsed_cycles;
 			uint64_t microseconds = 0;
 
