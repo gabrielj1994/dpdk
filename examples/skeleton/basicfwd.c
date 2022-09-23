@@ -170,16 +170,6 @@ lcore_main(struct rte_mempool *mbuf_pool)
 					0x32, 0x33, 0x34, 0x35,
 					0x36, 0x37};
 
-	struct rte_mbuf *bufs[BURST_SIZE];
-	bufs[0] = rte_pktmbuf_alloc(mbuf_pool);
-	char *data;
-	data = rte_pktmbuf_mtod(bufs[0], char*);
-	//Copy hard-coded ICMP echo request
-	memcpy(data, echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
-	struct rte_mbuf *mbuf = bufs[0];
-	mbuf->data_len = sizeof(echo_request)/sizeof(echo_request[0]);
-	mbuf->pkt_len = sizeof(echo_request)/sizeof(echo_request[0]);
-
 	/* Main work of application loop. 8< */
 	for (;;) {
 
@@ -191,6 +181,16 @@ lcore_main(struct rte_mempool *mbuf_pool)
 		RTE_ETH_FOREACH_DEV(port) {
 			// MIT 6.5810 LAB 1: Only use port1
 			if (port != 1) continue;
+
+			struct rte_mbuf *bufs[BURST_SIZE];
+			bufs[0] = rte_pktmbuf_alloc(mbuf_pool);
+			char *data;
+			data = rte_pktmbuf_mtod(bufs[0], char*);
+			//Copy hard-coded ICMP echo request
+			memcpy(data, echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
+			struct rte_mbuf *mbuf = bufs[0];
+			mbuf->data_len = sizeof(echo_request)/sizeof(echo_request[0]);
+			mbuf->pkt_len = sizeof(echo_request)/sizeof(echo_request[0]);
 			
 			/* Send ICMP echo request through TX packets. */
 			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
@@ -201,11 +201,9 @@ lcore_main(struct rte_mempool *mbuf_pool)
 			uint64_t elapsed_cycles;
 			uint64_t microseconds = 0;
 
-			/* Free any unsent packets. */
 			if (unlikely(nb_tx < request_size)) {
-				uint16_t buf;
-				for (buf = nb_tx; buf < request_size; buf++)
-					rte_pktmbuf_free(bufs[buf]);
+				/* Free any unsent packets. */
+				rte_pktmbuf_free(bufs[0]);
 			} else {
 				while (microseconds < 10000000) {
 					// 10 second time out
@@ -223,6 +221,7 @@ lcore_main(struct rte_mempool *mbuf_pool)
 				} else {
 					printf("\nLOGGING: ICMP Echo request timeout after 10 seconds\n");
 				}
+				rte_pktmbuf_free(bufs[0]);
 			}
 		}
 	}
