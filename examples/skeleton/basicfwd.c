@@ -281,6 +281,9 @@ lcore_main(struct rte_mempool *mbuf_pool)
 
 			//Copy hard-coded ICMP echo request
 			memcpy(data, echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
+			struct rte_mbuf *mbuf = bufs[0];
+			mbuf->data_len = sizeof(echo_request)/sizeof(echo_request[0]);
+			mbuf->pkt_len = sizeof(echo_request)/sizeof(echo_request[0]);
 
 			// Capture a whole packet
 			char *prtp = (char *)bufs[0];
