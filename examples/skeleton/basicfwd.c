@@ -250,7 +250,7 @@ lcore_main(void)
 			struct rte_mbuf *bufs[BURST_SIZE];
 
 			//Copy hard-coded ICMP echo request
-			memcpy((char *)bufs[0], echo_request, sizeof(echo_request/echo_request[0]));
+			memcpy((char *)bufs[0], echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
 
 			// Capture a whole packet
 			char *data;
