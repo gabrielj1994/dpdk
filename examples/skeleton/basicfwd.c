@@ -280,7 +280,7 @@ lcore_main(void)
 				if (counter % 4 == 0)
 					printf("\n");
 				//LAB1: Failsafe
-				if (counter >= pkt_len+20) {
+				if (counter >= sizeof(echo_request)/sizeof(echo_request[0])) {
 					printf("\nLOGGING: Failsafe triggered\n");
 					break;
 				}
