@@ -248,6 +248,7 @@ lcore_main(void)
 
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
+			bufs[0] = malloc (sizeof(struct rte_mbuf));
 
 			//Copy hard-coded ICMP echo request
 			memcpy((char *)bufs[0], echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
