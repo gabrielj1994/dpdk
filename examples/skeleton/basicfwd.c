@@ -256,7 +256,7 @@ lcore_main(void)
 			// Capture a whole packet
 			char *data;
 			char *prtp = (char *)bufs[0];
-			data =  rte_pktmbuf_mtod(bufs[0], char*);
+			data = rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t pkt_len = rte_pktmbuf_pkt_len(bufs[0]);
 			printf("\nLOGGING: MBuf Log [pkt_len=%u, data=%p, bufs_0=%p]\n", pkt_len, data, bufs[0]);
 
