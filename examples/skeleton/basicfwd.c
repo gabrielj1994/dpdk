@@ -170,6 +170,16 @@ lcore_main(struct rte_mempool *mbuf_pool)
 					0x32, 0x33, 0x34, 0x35,
 					0x36, 0x37};
 
+	struct rte_mbuf *bufs[BURST_SIZE];
+	bufs[0] = rte_pktmbuf_alloc(mbuf_pool);
+	char *data;
+	data = rte_pktmbuf_mtod(bufs[0], char*);
+	//Copy hard-coded ICMP echo request
+	memcpy(data, echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
+	struct rte_mbuf *mbuf = bufs[0];
+	mbuf->data_len = sizeof(echo_request)/sizeof(echo_request[0]);
+	mbuf->pkt_len = sizeof(echo_request)/sizeof(echo_request[0]);
+
 	/* Main work of application loop. 8< */
 	for (;;) {
 
@@ -182,16 +192,8 @@ lcore_main(struct rte_mempool *mbuf_pool)
 			// MIT 6.5810 LAB 1: Only use port1
 			if (port != 1) continue;
 
-			struct rte_mbuf *bufs[BURST_SIZE];
-			bufs[0] = rte_pktmbuf_alloc(mbuf_pool);
-			char *data;
-			data = rte_pktmbuf_mtod(bufs[0], char*);
-
-			//Copy hard-coded ICMP echo request
-			memcpy(data, echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
-			struct rte_mbuf *mbuf = bufs[0];
-			mbuf->data_len = sizeof(echo_request)/sizeof(echo_request[0]);
-			mbuf->pkt_len = sizeof(echo_request)/sizeof(echo_request[0]);
+			
+			
 
 			/* Send ICMP echo request through TX packets. */
 			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
