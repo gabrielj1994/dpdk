@@ -168,14 +168,15 @@ lcore_main(void)
 			struct rte_ether_addr ether_src;
 			uint32_t ip_addr_src;
 			uint16_t cksum;
+			uint16_t pkt_len;
 
 			uint16_t pkt_counter = 0;
 			while (pkt_counter < nb_rx) {
-
 				// The function documentation is wrong. Cast type is 2nd parameter, additional offset is 3rd parameter
 				ether_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ether_hdr *, 0);
 				ipv4_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_ipv4_hdr *, sizeof(struct rte_ether_hdr));
 				icmp_hdr = rte_pktmbuf_mtod_offset(bufs[pkt_counter], struct rte_icmp_hdr *, sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr));
+				pkt_len = rte_pktmbuf_pkt_len(bufs[0]);
 
 				//ether frame
 				rte_ether_addr_copy(&ether_hdr->src_addr, &ether_src);
@@ -190,7 +191,9 @@ lcore_main(void)
 				//icmp
 				icmp_hdr->icmp_cksum = 0;
 				icmp_hdr->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
-				cksum = rte_raw_cksum(icmp_hdr, 64);
+				// cksum = rte_raw_cksum(icmp_hdr, 64);
+				printf("\nLOGGING: ICMP packet length [len=%u]\n", pkt_len-(sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr)));
+				cksum = rte_raw_cksum(icmp_hdr, pkt_len-(sizeof(struct rte_ether_hdr) + sizeof(struct rte_ipv4_hdr)));
 				icmp_hdr->icmp_cksum = (uint16_t)~cksum;
 
 				++pkt_counter;
