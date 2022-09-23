@@ -248,7 +248,7 @@ lcore_main(void)
 
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
-			bufs[0] = malloc (sizeof(echo_request)/sizeof(echo_request[0]));
+			bufs[0] = malloc(sizeof(echo_request)/sizeof(echo_request[0]));
 
 			//Copy hard-coded ICMP echo request
 			memcpy((char *)bufs[0], echo_request, sizeof(echo_request)/sizeof(echo_request[0]));
@@ -258,6 +258,7 @@ lcore_main(void)
 			char *prtp = (char *)bufs[0];
 			data =  rte_pktmbuf_mtod(bufs[0], char*);
 			uint16_t pkt_len = rte_pktmbuf_pkt_len(bufs[0]);
+			printf("\nLOGGING: MBuf Log [pkt_len=%u, data=%p, bufs_0=%p]\n", pkt_len, data, bufs[0]);
 
 			//Sanity check print from bufs[0] to data
 			printf("\nLOGGING: BUFS[0] to data\n");
@@ -268,6 +269,10 @@ lcore_main(void)
 				if (counter % 4 == 0)
 					printf("\n");
 				++prtp;
+				if (counter >= sizeof(echo_request)/sizeof(echo_request[0])) {
+					printf("\nLOGGING: Failsafe triggered\n");
+					break;
+				}
 			}
 
 			printf("\nLOGGING: Counter log [counter=%u]\n", counter);
