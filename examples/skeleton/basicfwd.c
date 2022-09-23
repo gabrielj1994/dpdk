@@ -162,6 +162,11 @@ lcore_main(void)
 			if (unlikely(nb_rx == 0))
 				continue;
 
+			uint64_t hz = rte_get_timer_hz(); 
+			uint64_t begin = rte_rdtsc_precise(); 
+			uint64_t elapsed_cycles;
+			uint64_t microseconds;
+
 			struct rte_ether_hdr *ether_hdr;
 			struct rte_ipv4_hdr *ipv4_hdr;
 			struct rte_icmp_hdr *icmp_hdr;
@@ -198,8 +203,11 @@ lcore_main(void)
 			}
 			const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
 					bufs, nb_rx);
+			
+			elapsed_cycles = rte_rdtsc_precise() - begin; 
+			microseconds = elapsed_cycles * 1000000 / hz;
 
-			printf("\nLOGGING: ICMP Echo Request received and ICMP Echo Reply transmitted [nb_tx=%u]\n", nb_tx);
+			printf("\nLOGGING: ICMP Echo Request received and ICMP Echo Reply transmitted [nb_tx=%u, logic_overhead_time=%" PRIu64 "]\n", nb_tx, microseconds);
 			/* Free any unsent packets. */
 			if (unlikely(nb_tx < nb_rx)) {
 				uint16_t buf;
