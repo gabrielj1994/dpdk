@@ -21,6 +21,8 @@
 #define MBUF_CACHE_SIZE 250
 #define BURST_SIZE 32
 
+#define LAB2_PORT_ID 2
+
 /* basicfwd.c: Basic DPDK skeleton forwarding example. */
 
 /*
@@ -45,7 +47,7 @@ port_init(uint16_t port, struct rte_mempool *mbuf_pool)
 		return -1;
 
     // LAB1: Only use port1
-	if (port != 1) return -1;
+	if (port != LAB2_PORT_ID) return -1;
 
 	memset(&port_conf, 0, sizeof(struct rte_eth_conf));
 
@@ -152,7 +154,7 @@ lcore_main(void)
 		 */
 		RTE_ETH_FOREACH_DEV(port) {
 			// LAB1: Only use port1
-			if (port != 1) continue;
+			if (port != LAB2_PORT_ID) continue;
 
 			/* Get burst of RX packets, from first port of pair. */
 			struct rte_mbuf *bufs[BURST_SIZE];
@@ -241,9 +243,11 @@ main(int argc, char *argv[])
 	argv += ret;
 
 	/* Check that there is an even number of ports to send/receive on. */
-	nb_ports = rte_eth_dev_count_avail();
-	if (nb_ports < 2 || (nb_ports & 1))
-		rte_exit(EXIT_FAILURE, "Error: number of ports must be even\n");
+	//TODO - PRUNING: Lab2 edits
+	// nb_ports = rte_eth_dev_count_avail();
+	// if (nb_ports < 2 || (nb_ports & 1))
+	// 	rte_exit(EXIT_FAILURE, "Error: number of ports must be even\n");
+	nb_ports = 1;
 
 	/* Creates a new mempool in memory to hold the mbufs. */
 
@@ -259,7 +263,7 @@ main(int argc, char *argv[])
 	RTE_ETH_FOREACH_DEV(portid) {
 		printf("\nLOGGING: [portid=%u]\n", portid);
 		// LAB1: Only use port1
-		if (portid != 1) continue;
+		if (portid != LAB2_PORT_ID) continue;
 		if (port_init(portid, mbuf_pool) != 0)
 			rte_exit(EXIT_FAILURE, "Cannot init port %"PRIu16 "\n",
 					portid);
